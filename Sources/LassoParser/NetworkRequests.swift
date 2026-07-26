@@ -22,6 +22,45 @@ enum LassoIncludeURL {
     /// threaded through the fixed `LassoNativeFunction` signature.
     nonisolated(unsafe) static var testSessionOverride: URLSession?
 
+    // MARK: - `-verifyPeer=false` (task #191)
+    //
+    // Darwin: InsecureTLSDelegate below does the real thing, unchanged.
+    //
+    // Linux: NOT implemented. swift-corelibs-foundation's URLSessionDelegate
+    // doesn't expose `challenge.protectionSpace.serverTrust` at all — it's
+    // typed `Any?` there and the real Darwin `SecTrust` bridging + Security
+    // framework it needs don't exist on that platform (confirmed by direct
+    // Linux build attempt: `serverTrust` reports "swift-corelibs-foundation
+    // does not support methods of authentication that rely on the Darwin
+    // Security framework", tracked as task #191). `perform(_:context:)`
+    // below throws a clear, catchable `LassoRecoverableError` (code 3003)
+    // when `-verifyPeer=false` is requested on Linux, rather than either
+    // silently ignoring the flag (which would leave peer verification ON
+    // while the caller explicitly asked for it OFF — a false claim of
+    // having honored the request) or letting it fall through to a crash.
+    //
+    // What a real Linux implementation needs (for a future project, not
+    // scoped here — no corpus evidence yet that any real caller needs
+    // `-verifyPeer=false` off Darwin): swift-corelibs-foundation's
+    // URLSession is libcurl-backed on Linux, and libcurl's own
+    // CURLOPT_SSL_VERIFYPEER/CURLOPT_SSL_VERIFYHOST flags are the
+    // equivalent mechanism — but URLSessionDelegate doesn't expose a
+    // curl-easy-handle hook to set them per-request. Real options:
+    // (a) a custom URLProtocol that shells out to libcurl directly
+    //     (or a small C shim over libcurl) instead of going through
+    //     URLSession's own networking stack, giving direct access to
+    //     CURLOPT_SSL_VERIFYPEER;
+    // (b) swift-nio-ssl's own TLS stack via a hand-rolled HTTP client
+    //     instead of URLSession, with `NIOSSLContext`'s
+    //     `.certificateVerification = .none` (the same mechanism
+    //     `TLSContextManager`/`CertificateWatcher` already use elsewhere
+    //     in this ecosystem for the *server* side);
+    // (c) waiting for swift-corelibs-foundation to grow real Linux TLS
+    //     trust APIs (tracked upstream, not on any committed timeline
+    //     as of this writing).
+    // (b) is probably the best fit for this codebase specifically, since
+    // NIOSSL is already a first-class dependency via Perfect-NIO.
+    #if canImport(Darwin)
     /// Accepts ANY server TLS certificate unconditionally when `-verifyPeer`
     /// is explicitly set to false — an explicit per-call opt-in for a known
     /// dev/test endpoint (e.g. a sandbox gateway or local self-signed
@@ -40,6 +79,7 @@ enum LassoIncludeURL {
             completionHandler(.useCredential, URLCredential(trust: trust))
         }
     }
+    #endif
 
     /// Real `x-www-form-urlencoded`: only unreserved characters
     /// (alphanumeric, `-_.~`) stay literal, space becomes `+` (not `%20`),
@@ -101,11 +141,25 @@ enum LassoIncludeURL {
         }
 
         let verifyPeer = arguments.firstValue(named: "verifypeer").map(\.isTruthy) ?? true
-        let session: URLSession = testSessionOverride ?? (
-            verifyPeer
-                ? .shared
-                : URLSession(configuration: .ephemeral, delegate: InsecureTLSDelegate(), delegateQueue: nil)
-        )
+        let session: URLSession
+        if let testSessionOverride {
+            session = testSessionOverride
+        } else if verifyPeer {
+            session = .shared
+        } else {
+            #if canImport(Darwin)
+            session = URLSession(configuration: .ephemeral, delegate: InsecureTLSDelegate(), delegateQueue: nil)
+            #else
+            // See the task #191 doc comment above InsecureTLSDelegate's
+            // #if canImport(Darwin) block: not implemented on Linux yet.
+            throw LassoRecoverableError(LassoErrorState(
+                code: 3003,
+                message: "Include_URL -verifyPeer=false is not supported on Linux.",
+                kind: "network",
+                detail: "TLS peer-verification bypass (task #191) has no Linux implementation yet — swift-corelibs-foundation exposes no server-trust API to build one against URLSession directly."
+            ))
+            #endif
+        }
 
         let data: Data
         let response: URLResponse
