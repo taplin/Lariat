@@ -7,7 +7,7 @@
       "location" : "https://github.com/taplin/Perfect-CRUD.git",
       "state" : {
         "branch" : "main",
-        "revision" : "52ad2eeed8c693cd43108f5df42f967311b64506"
+        "revision" : "809005942005b9604ce9b35fee78d58d93d42c56"
       }
     },
     {
@@ -16,7 +16,7 @@
       "location" : "https://github.com/taplin/Perfect-FileMaker.git",
       "state" : {
         "branch" : "main",
-        "revision" : "cdc8bff1124eaec6124c5dea7df1063d35a15395"
+        "revision" : "3eb4f68f28d760e79cfe5f4d1c4208c66dcdd3c4"
       }
     },
     {
@@ -34,7 +34,7 @@
       "location" : "https://github.com/taplin/Perfect-MySQL.git",
       "state" : {
         "branch" : "main",
-        "revision" : "fa2dc731bb8b649f1e64325e7bb8fc5fff74b60a"
+        "revision" : "9ab631094c3eb9a90ca6d5586dab502e1c1e2256"
       }
     },
     {
@@ -43,7 +43,7 @@
       "location" : "https://github.com/taplin/Perfect-NIO.git",
       "state" : {
         "branch" : "main",
-        "revision" : "ed5400c5a467fd3c7aa3b91a3fb26b065b0ee219"
+        "revision" : "ad7c60b3efa878ae137125473c6021190b80a773"
       }
     },
     {
@@ -52,7 +52,7 @@
       "location" : "https://github.com/taplin/Perfect-PostgreSQL.git",
       "state" : {
         "branch" : "main",
-        "revision" : "bb5e82bc31f43bf96969a29ffcf3c36f4a6c49cd"
+        "revision" : "565a7e4477b41d72e26c2b17a7cc684d6a551236"
       }
     },
     {
@@ -61,7 +61,7 @@
       "location" : "https://github.com/taplin/Perfect-Redis.git",
       "state" : {
         "branch" : "main",
-        "revision" : "27fa47af69f4422ec09ebdf35b10bbd74d6db4c3"
+        "revision" : "47b457601642a11daa09fee16df55e14ec60ac26"
       }
     },
     {
@@ -70,7 +70,7 @@
       "location" : "https://github.com/taplin/Perfect-Session.git",
       "state" : {
         "branch" : "main",
-        "revision" : "044afa636e95b6391f991619d2e05b2ee1e8955a"
+        "revision" : "2018195554d3076f1dfbec407168396c7f11e6cd"
       }
     },
     {
@@ -79,7 +79,7 @@
       "location" : "https://github.com/taplin/Perfect-SMTP.git",
       "state" : {
         "branch" : "main",
-        "revision" : "0deb9f9e9e5de44c93285e4ce3f97e9c5af23a9d"
+        "revision" : "cb0493bee9c1626c550c2ea334e5da8d322e1c2c"
       }
     },
     {
@@ -88,7 +88,7 @@
       "location" : "https://github.com/taplin/Perfect-SQLite.git",
       "state" : {
         "branch" : "main",
-        "revision" : "3d8b52ebca28e7c871cd74310739b4de2d460ea1"
+        "revision" : "0162796ce323cdd9d7cd84d6c24c4645fe82767d"
       }
     },
     {
@@ -97,7 +97,7 @@
       "location" : "https://github.com/taplin/Perfect-XML.git",
       "state" : {
         "branch" : "main",
-        "revision" : "41299cd60331be3bb72b4ea8026ae83938af3966"
+        "revision" : "43cab4b58d5a0bd0b430e6b6708e0e97814d63ae"
       }
     },
     {
