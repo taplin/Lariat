@@ -43,7 +43,7 @@
       "location" : "https://github.com/taplin/Perfect-NIO.git",
       "state" : {
         "branch" : "main",
-        "revision" : "328b063ab8dd04f26a2a7aa17bb885173669bd8f"
+        "revision" : "ed5400c5a467fd3c7aa3b91a3fb26b065b0ee219"
       }
     },
     {
@@ -52,7 +52,7 @@
       "location" : "https://github.com/taplin/Perfect-PostgreSQL.git",
       "state" : {
         "branch" : "main",
-        "revision" : "3b9b0f61e5503bab804616cf509f6e6075f35cfc"
+        "revision" : "bb5e82bc31f43bf96969a29ffcf3c36f4a6c49cd"
       }
     },
     {
@@ -61,7 +61,7 @@
       "location" : "https://github.com/taplin/Perfect-Redis.git",
       "state" : {
         "branch" : "main",
-        "revision" : "0a08271d61f16bf08af7f43ce3a2ef63e85d6be6"
+        "revision" : "27fa47af69f4422ec09ebdf35b10bbd74d6db4c3"
       }
     },
     {
@@ -88,7 +88,7 @@
       "location" : "https://github.com/taplin/Perfect-SQLite.git",
       "state" : {
         "branch" : "main",
-        "revision" : "a52cdba88e15f15e1bbf996f0ed901d477be7322"
+        "revision" : "3d8b52ebca28e7c871cd74310739b4de2d460ea1"
       }
     },
     {
