@@ -1,7 +1,7 @@
 # LassoPerfectSMTP — Integration Plan
 
 Date: 2026-07-19
-Status: **Reviewed once (architecture/Lasso-runtime-accuracy, concurrency, security), corrected, not yet implemented.** This document is the output of a research pass against both `/Users/timtaplin/Perfect-Lasso` and `/Users/timtaplin/Perfect-Resurrection/Perfect-SMTP`, an architecture draft, and a full parallel review pass that found one architecturally load-bearing gap in the original draft — see §4.0, added in response, and §9 (review record) for the full history.
+Status: **Implemented — all six phases (A-F) shipped, merged to `main`, and released as part of [v0.2.1](https://github.com/taplin/Perfect-Lasso/releases/tag/v0.2.1).** This document remains the design record of how it got there; phase-by-phase framing below (including "not yet implemented" language) describes the planning process at the time, not current status. See `Sources/LassoPerfectSMTP/` for the shipped implementation.
 
 ## 1. Why this exists, and what it is not
 
