@@ -1,4 +1,16 @@
+// @preconcurrency, and BEFORE `import Foundation`: Glibc's C headers (stdout/
+// stderr/etc.) predate Swift concurrency and aren't annotated for it, unlike
+// Darwin's SDK. Import order matters here — this must come first, or Swift
+// resolves bare `stdout` via Foundation's own (non-preconcurrency) re-export
+// instead and the diagnostic below still fires. See `processStdout`'s own
+// doc comment (near `siteServerTask`) for the one place this actually matters.
+#if canImport(Glibc)
+@preconcurrency import Glibc
+#endif
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 import LassoCrawlReport
 import LassoParser
 import LassoPerfectCRUD
@@ -2133,7 +2145,7 @@ struct LassoSiteServer: Sendable {
             resolvedPath: resolvedPath,
             filePath: fileURL?.path
         )
-        fputs(details.logLine + "\n", stderr)
+        FileHandle.standardError.write(Data((details.logLine + "\n").utf8))
         if let logCapture {
             Task { await logCapture.capture("[render-error] " + details.logLine) }
         }
@@ -2232,7 +2244,7 @@ func logDatasourceActionFailure(
     datasourceFailureTracker: DatasourceFailureTracker? = nil
 ) {
     let line = "Datasource action failed kind=\(kind) datasource=\(datasource) error=\(error)"
-    fputs(line + "\n", stderr)
+    FileHandle.standardError.write(Data((line + "\n").utf8))
     if let logCapture {
         Task { await logCapture.capture("[datasource] " + line) }
     }
@@ -2629,11 +2641,11 @@ private extension String {
 if let baselinePath = ProcessInfo.processInfo.environment["LASSO_CRAWL_DIFF_BASELINE"],
    let currentPath = ProcessInfo.processInfo.environment["LASSO_CRAWL_DIFF_CURRENT"] {
     guard let baseline = CrawlReport.loadBaseline(baselinePath) else {
-        fputs("Could not read LASSO_CRAWL_DIFF_BASELINE: \(baselinePath)\n", stderr)
+        FileHandle.standardError.write(Data(("Could not read LASSO_CRAWL_DIFF_BASELINE: \(baselinePath)\n").utf8))
         exit(1)
     }
     guard let current = CrawlReport.loadBaseline(currentPath) else {
-        fputs("Could not read LASSO_CRAWL_DIFF_CURRENT: \(currentPath)\n", stderr)
+        FileHandle.standardError.write(Data(("Could not read LASSO_CRAWL_DIFF_CURRENT: \(currentPath)\n").utf8))
         exit(1)
     }
     CrawlReport.printDiff(CrawlReport.diff(baseline: baseline, current: current))
@@ -2653,6 +2665,14 @@ let metrics = config.adminConsoleEnabled ? AdminMetrics() : nil
 // used when `config.cwpJanitorEnabled` starts the poll loop below.
 let janitorTracker = CWPSessionJanitorTracker()
 let siteServer = try LassoSiteServer(config: config, logCapture: logCapture, metrics: metrics)
+/// Linux's Glibc module map doesn't annotate `stdout` as safe for cross-isolation
+/// access (Darwin's does — this only errors in the Linux build). `nonisolated(unsafe)`
+/// applies to declarations, not to a local `let` inside a closure body, so this must
+/// be a file-scope constant read by `siteServerTask`'s `Task.detached` closure below,
+/// not declared inline at its one call site. Genuinely safe: that call site is a real,
+/// single synchronization point (flush right before signaling readiness to a restart's
+/// spawned-child watcher), not concurrent access to shared state from multiple tasks.
+nonisolated(unsafe) let processStdout = stdout
 // Started below (after the "Listening" print moves inside its ready callback) as a
 // cancellable, awaitable Task rather than a bare blocking call — the admin console's
 // "restart-server" action needs a handle it can `.cancel()` to gracefully hand off to a
@@ -2670,7 +2690,10 @@ let siteServerTask = Task.detached {
             // restart's spawned-child readiness watcher reads this process's stdout when
             // *it's* the child, and without an explicit flush this line could sit in libc's
             // buffer indefinitely instead of ever reaching the parent.
-            fflush(stdout)
+            //
+            // Reads `processStdout`, a file-scope `nonisolated(unsafe)` constant, not
+            // the raw `stdout` global directly — see its own doc comment for why.
+            fflush(processStdout)
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 3600_000_000_000)
             }
@@ -2686,7 +2709,7 @@ if let startupPath = config.startupPath {
     )
     print("Startup folder: \(startupPath.path) (\(result.loadedFiles.count) loaded, \(result.failedFiles.count) failed)")
     for failure in result.failedFiles {
-        fputs("Startup load failed: \(failure.file): \(failure.error)\n", stderr)
+        FileHandle.standardError.write(Data(("Startup load failed: \(failure.file): \(failure.error)\n").utf8))
     }
 } else {
     print("Startup folder: none")
@@ -2695,7 +2718,7 @@ if let appsPath = config.appsPath {
     let result = await loadLassoApps(at: appsPath, tagRegistry: siteServer.tagRegistry)
     print("LassoApps: \(appsPath.path) (\(result.loadedFiles.count) loaded, \(result.failedFiles.count) failed)")
     for failure in result.failedFiles {
-        fputs("LassoApp load failed: \(failure.file): \(failure.error)\n", stderr)
+        FileHandle.standardError.write(Data(("LassoApp load failed: \(failure.file): \(failure.error)\n").utf8))
     }
 } else {
     print("LassoApps: none")
@@ -2727,13 +2750,13 @@ if config.crawlReportMode {
         var pathList: [String]?
         if let pathListPath = config.crawlPathListPath {
             guard let loaded = CrawlReport.loadPathList(pathListPath) else {
-                fputs("Could not read LASSO_CRAWL_PATH_LIST: \(pathListPath)\n", stderr)
+                FileHandle.standardError.write(Data(("Could not read LASSO_CRAWL_PATH_LIST: \(pathListPath)\n").utf8))
                 exit(1)
             }
             pathList = loaded
         } else if let baselinePath = config.crawlBaselinePath, let onlyFailure = config.crawlOnlyFailure {
             guard let baseline = CrawlReport.loadBaseline(baselinePath) else {
-                fputs("Could not read LASSO_CRAWL_BASELINE: \(baselinePath)\n", stderr)
+                FileHandle.standardError.write(Data(("Could not read LASSO_CRAWL_BASELINE: \(baselinePath)\n").utf8))
                 exit(1)
             }
             pathList = CrawlReport.pathsMatchingFailure(baseline, substring: onlyFailure)
@@ -2783,12 +2806,36 @@ var cwpAdminAPIClient: FMAdminClient?
 var cwpJanitorTask: Task<Void, Never>?
 if config.cwpJanitorEnabled {
     print("CWP session janitor: enabled (dry-run: \(config.cwpJanitorDryRun), poll every \(config.cwpJanitorPollIntervalSeconds)s)")
+    let cwpJanitorURLSession: URLSession
+    if config.fmAdminAPITrustSelfSignedTLS {
+        #if canImport(Darwin)
+        cwpJanitorURLSession = FMAdminClient.insecureURLSession()
+        #else
+        // FMAdminClient.insecureURLSession() is itself Darwin-gated in
+        // Perfect-FileMaker-AdminAPI (FMAdminInsecureTLS.swift) — swift-
+        // corelibs-foundation exposes no server-trust API to build a Linux
+        // equivalent against, matching this project's own `include_url
+        // -verifyPeer=false` gap (task #191). Fail startup with a clear
+        // message rather than silently falling back to `.shared` (which
+        // would leave TLS verification ON while the operator explicitly
+        // asked for it OFF against a presumed self-signed server).
+        FileHandle.standardError.write(Data("""
+            CWP session janitor: -fmAdminAPITrustSelfSignedTLS is not supported on Linux — \
+            FMAdminClient.insecureURLSession() has no Linux implementation. Install the \
+            FileMaker Server's certificate into the system CA trust store instead, or run \
+            without -fmAdminAPITrustSelfSignedTLS against a server with a trusted certificate.\n
+            """.utf8))
+        exit(1)
+        #endif
+    } else {
+        cwpJanitorURLSession = .shared
+    }
     let adminAPIClient = FMAdminClient(
         host: config.fmAdminAPIHost!, // validated non-nil in ServerConfig.load()
         port: config.fmAdminAPIPort,
         username: config.fmAdminAPIUser!,
         password: config.fmAdminAPIPassword!,
-        urlSession: config.fmAdminAPITrustSelfSignedTLS ? FMAdminClient.insecureURLSession() : .shared
+        urlSession: cwpJanitorURLSession
     )
     cwpAdminAPIClient = adminAPIClient
     cwpJanitorTask = Task {
@@ -2867,7 +2914,7 @@ if config.adminConsoleEnabled {
                 }
             }
         }
-        fputs("[AdminConsole] failed to start after repeated attempts: \(lastError.map { "\($0)" } ?? "unknown error")\n", stderr)
+        FileHandle.standardError.write(Data(("[AdminConsole] failed to start after repeated attempts: \(lastError.map { "\($0)" } ?? "unknown error")\n").utf8))
     }
 } else {
     print("Admin console: disabled (set LASSO_ADMIN_CONSOLE=1 to enable)")
@@ -2879,6 +2926,6 @@ do {
     // Expected: the "restart-server" admin action cancelled this deliberately
     // once a replacement process proved itself healthy.
 } catch {
-    fputs("Site server failed: \(error)\n", stderr)
+    FileHandle.standardError.write(Data(("Site server failed: \(error)\n").utf8))
     exit(1)
 }
