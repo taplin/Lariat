@@ -6,7 +6,7 @@ This repo has no pre-built binary releases yet — you build it from source, aga
 
 ## Releases
 
-See the [GitHub Releases page](https://github.com/taplin/Perfect-Lasso/releases) for what's changed in each version. The current release, [v0.2.1](https://github.com/taplin/Perfect-Lasso/releases/tag/v0.2.1), is validated on **macOS only** (build + full test suite green). Linux support is in progress: two dependency-level portability gaps are already fixed, and three gaps remain inside Perfect-Lasso itself, all documented in the release notes.
+See the [GitHub Releases page](https://github.com/taplin/Perfect-Lasso/releases) for what's changed in each version. As of this release, both **macOS and Linux** are fully validated — build and the complete 1110-test suite pass clean on both, verified from a clean rebuild in a Linux container. The three Perfect-Lasso-internal Linux gaps and one real cross-platform bug found along the way are documented in the release notes.
 
 ## Trying it against your own site
 
