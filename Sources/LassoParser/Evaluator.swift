@@ -7,6 +7,17 @@ struct Evaluator {
     /// already wraps `Evaluator` — injected by `RendererEngine.init`.
     var renderNodes: ((_ nodes: [LassoNode], _ context: inout LassoContext) async throws -> String)? = nil
 
+    /// `->forEachWordBreak`'s cross-platform word-boundary pattern — see that
+    /// case's own doc comment (task #192) for why this replaced Foundation's
+    /// Darwin-only ICU `.byWords`. `NSRegularExpression`, not Swift's newer
+    /// `Regex` type: `Regex.init(_:)` needs macOS 13+ (this package targets
+    /// macOS 12), and `Regex` itself isn't `Sendable` (a static `let` of one
+    /// fails Swift 6 strict-concurrency checking). `NSRegularExpression` is
+    /// available on both platforms with no such floor, and is itself
+    /// `Sendable` once constructed. Compiled once; `Evaluator` may be
+    /// constructed per-evaluation, so this must not be an instance property.
+    private static let wordBreakPattern = try! NSRegularExpression(pattern: "\\w+(?:['\u{2019}]\\w+)*")
+
     mutating func evaluate(_ expression: LassoExpression) async throws -> LassoValue {
         switch expression {
         case let .string(value): return .string(value)
@@ -2430,17 +2441,27 @@ struct Evaluator {
         case let (.string(value), "foreachwordbreak"):
             // "Executes a given capture block once for every word in
             // the base string." Real Lasso docs never define "word"
-            // further — `String.enumerateSubstrings(options: .byWords)`
-            // is Foundation's own ICU-backed Unicode word-boundary
-            // segmentation (UAX #29), matching this project's
-            // established "default to real ICU/Unicode behavior when
-            // docs are ambiguous" convention (see memory:
-            // lasso-standards-culture) rather than a hand-rolled
-            // whitespace-split guess.
-            var words: [LassoValue] = []
-            value.enumerateSubstrings(in: value.startIndex..<value.endIndex, options: .byWords) { substring, _, _, _ in
-                if let substring { words.append(.string(substring)) }
-            }
+            // further. Originally implemented via Foundation's ICU-backed
+            // `String.enumerateSubstrings(options: .byWords)` (Darwin-only —
+            // swift-corelibs-foundation on Linux has no ICU word-break
+            // iterator at all, confirmed by direct Linux build attempt,
+            // tracked as task #192). Replaced with `NSRegularExpression`
+            // (`\w+` plus an optional apostrophe-joined continuation for
+            // contractions/possessives — "don't", "Bob's") — available on
+            // both platforms via Foundation, no ICU text-segmentation API
+            // needed. Empirically verified byte-for-byte identical output
+            // to the
+            // old `.byWords` path across Latin text with punctuation,
+            // hyphens, underscores, accented letters (café, naïve), and
+            // contractions — see the word-boundary comparison run during
+            // task #192's Linux investigation. Not exhaustively verified
+            // against non-Latin scripts (CJK, Thai, etc.) where real UAX #29
+            // dictionary-based segmentation and this simpler pattern could
+            // diverge — no corpus evidence of that need has surfaced.
+            let nsValue = value as NSString
+            let fullRange = NSRange(location: 0, length: nsValue.length)
+            let words: [LassoValue] = Self.wordBreakPattern.matches(in: value, range: fullRange)
+                .map { .string(nsValue.substring(with: $0.range)) }
             return try await invokeForEachCapture(over: words, evaluatedArguments: evaluate(arguments))
         case let (.string(value), "foreachlinebreak"):
             // "Executes a given capture block once for every substring
