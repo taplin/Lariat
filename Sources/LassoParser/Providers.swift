@@ -552,7 +552,19 @@ public struct LassoFileSystemIncludeLoader: LassoIncludeLoader {
             let normalizedIncludingPath = includingPath.hasPrefix("/")
                 ? String(includingPath.dropFirst())
                 : includingPath
-            let parent = URL(fileURLWithPath: normalizedIncludingPath, relativeTo: root)
+            // NOT `URL(fileURLWithPath:relativeTo:)` — found live on Linux (task:
+            // Linux build validation), reproduced and root-caused directly: `root`
+            // is built via `resolvingSymlinksInPath()` in `init`, which on Darwin
+            // correctly marks the resulting URL as a directory (so RFC 3986 relative
+            // resolution APPENDS the relative path), but swift-corelibs-foundation on
+            // Linux doesn't preserve that directory hint through
+            // `resolvingSymlinksInPath()` — so the same call there treats `root` as a
+            // FILE and REPLACES its last path component instead, silently dropping
+            // the site root's own leaf directory (e.g. `/tmp/site-root/pages` became
+            // `/tmp/pages`). `.appendingPathComponent` doesn't depend on that
+            // directory-hint bit at all — verified identical, correct output on both
+            // platforms.
+            let parent = root.appendingPathComponent(normalizedIncludingPath)
                 .deletingLastPathComponent()
             bases.insert(parent, at: 0)
         }
