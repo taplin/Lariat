@@ -2011,22 +2011,27 @@ extension LassoValue {
         // other values (42, 3.14, -5, ...) were already routed
         // correctly by the old code, since the `as? Bool` cast failed
         // for them and fell through to the `Int`/`Double` cases below.
-        // `CFGetTypeID(_:) == CFBooleanGetTypeID()` is the standard,
-        // reliable way to tell a real JSON boolean apart from a real
-        // JSON number that merely also bridges to `NSNumber` — both are
-        // backed by different underlying CoreFoundation types
-        // (`CFBoolean` vs `CFNumber`) despite Swift's `as? Bool`/`as?
-        // Int`/`as? Double` casts not respecting that distinction for
-        // the 0/1 case. `CFNumberIsFloatType(_:)` is the equally
-        // standard way to tell whether a JSON number literal had a
-        // decimal point (found by testing this exact function's new
-        // `json_deserialize` caller — a Map containing both an integer
-        // valued 1 and a boolean `true` together surfaced the
-        // corruption immediately).
+        // Distinguishing a real JSON boolean from a real JSON number that
+        // merely also bridges to `NSNumber` needs more than `as? Bool`/`as?
+        // Int`/`as? Double` — those casts don't respect the distinction for
+        // the 0/1 case (see SE-0170: `NSNumber as? Bool` succeeds for
+        // exactly 0/1). Originally used `CFGetTypeID(_:) ==
+        // CFBooleanGetTypeID()` / `CFNumberIsFloatType(_:)`, but both are
+        // CoreFoundation — Darwin-only, unavailable in swift-corelibs-
+        // foundation (confirmed by direct Linux build attempt, tracked as
+        // task #193). Replaced with `NSNumber.objCType`, which both
+        // Foundation implementations expose identically for exactly this
+        // purpose: `JSONSerialization` tags a JSON boolean's NSNumber with
+        // the ObjC BOOL encoding `"c"` on BOTH platforms (empirically
+        // verified — Darwin and this project's Linux container agree).
+        // Plain integers differ by platform (`"q"` on Darwin, `"i"` on
+        // Linux) so only "is it `c`" / "is it a float encoding" are checked
+        // — never a specific integer code — and anything else falls
+        // through to `.integer`, matching the old code's structure exactly.
         case let value as NSNumber:
-            if CFGetTypeID(value) == CFBooleanGetTypeID() {
+            if String(cString: value.objCType) == "c" {
                 .boolean(value.boolValue)
-            } else if CFNumberIsFloatType(value) {
+            } else if ["f", "d"].contains(String(cString: value.objCType)) {
                 .decimal(value.doubleValue)
             } else {
                 .integer(value.intValue)
