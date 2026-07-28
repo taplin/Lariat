@@ -75,3 +75,34 @@ gh release delete v0.1.0 --yes
 git push origin :refs/tags/v0.1.0
 git tag -d v0.1.0
 ```
+
+## Changelog
+
+One line per tag, most recent first — full details live in each tag's own GitHub release notes
+(`gh release view vX.Y.Z`), this is just a scannable index. Add an entry here as part of cutting
+each release, not after the fact.
+
+- **`v0.2.3`** (2026-07-27) — dependency-only patch, no Perfect-Lasso source changes. Pulls in
+  Perfect-CRUD's ADR-0001 connection pooling (`DatabaseConnectionPool`) and async execution
+  boundary, plus its `CRUDTableStructure()` visibility fix (was `internal`, broke every host
+  module's documented `AdminConsoleDelegate.registeredModels()` implementation); Perfect-NIO's
+  matching pool-based `Routes.db(pool:)`/`.table(pool:)` overloads and admin-console model-schema
+  browser slice; Perfect-MySQL's and Perfect-FileMaker-AdminAPI's own latest `main`.
+- **`v0.2.2`** (2026-07-26) — Linux support fully working, not in-progress. 1110/1110 tests pass on
+  both macOS and Linux from a clean rebuild; closed the three Linux gaps deferred since `v0.2.0`
+  plus a first-ever `lasso-perfect-server` executable build/test pass on Linux, which turned up
+  several more fixes and one real (not Linux-specific) cross-platform bug in `LassoFileSystemIncludeLoader`.
+- **`v0.2.1-legacy10.15`** (2026-07-24, prerelease) — legacy macOS 10.15/11 build attempt,
+  concluded and not recommended for use: a `libmysqlclient` symbol 10.15/11's system `libc++`
+  doesn't export is a full launch blocker, on top of an already-known `URLSession.data(for:)` gap.
+  Native support for that hardware tier isn't being pursued further; see the root README's
+  Requirements section for the recommended OpenCore Legacy Patcher path instead.
+- **`v0.2.1`** (2026-07-23) — docs-only patch, no code changes. Fixed a README stale since before
+  `v0.2.0` (missing release pointer, missing macOS-only validation note) plus a same-day fix to
+  `Perfect-FileMaker-AdminAPI`'s own README (a stale `macOS 26+` claim after its deployment target
+  had already been lowered to 14.0).
+- **`v0.2.0`** (2026-07-23) — the legacy `ds()` datasource API (classic `ds()->database()->sql()->rows`
+  object API) now works end-to-end against real third-party corpus code; read path only
+  (`add`/`update`/`delete`/`execsql` on the `mysqlds` connector intentionally out of scope). Plus
+  new language support additions — see the tag's own release notes for the full list.
+- **`v0.1.0`** (2026-07-22) — initial tagged release.
