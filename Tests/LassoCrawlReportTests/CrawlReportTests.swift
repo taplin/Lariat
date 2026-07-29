@@ -703,3 +703,54 @@ struct CrawlReportRunTests {
 }
 
 }
+
+// MARK: - CrawlReport.groupByConstruct / failureClass (admin-console UI redesign phase 6)
+// Extracted out of `printAndWrite` so it and the admin console's structured
+// `actionReport(for:)` share one implementation — these tests confirm the
+// extraction preserved `printAndWrite`'s existing ordering/keying behavior.
+
+@Test func groupByConstructGroupsByErrorDescriptionNotErrorType() {
+    let results = [
+        CrawlPageResult(path: "/a", statusCode: 500, errorType: "LassoRuntimeError", errorDescription: "unknownFunction(\"Output\")", elapsedMS: 1),
+        CrawlPageResult(path: "/b", statusCode: 500, errorType: "LassoRuntimeError", errorDescription: "unsupportedExpression(\"Member extend\")", elapsedMS: 1),
+    ]
+    let groups = CrawlReport.groupByConstruct(results)
+    #expect(groups.map(\.construct).sorted() == ["unknownFunction(\"Output\")", "unsupportedExpression(\"Member extend\")"])
+}
+
+@Test func groupByConstructFallsBackToErrorTypeWhenDescriptionIsNilOrEmpty() {
+    let results = [
+        CrawlPageResult(path: "/a", statusCode: 500, errorType: "timeout", errorDescription: nil, elapsedMS: 1),
+        CrawlPageResult(path: "/b", statusCode: 500, errorType: "timeout", errorDescription: "", elapsedMS: 1),
+    ]
+    let groups = CrawlReport.groupByConstruct(results)
+    #expect(groups.count == 1)
+    #expect(groups[0].construct == "timeout")
+    #expect(groups[0].pages.count == 2)
+}
+
+@Test func groupByConstructFallsBackToUnknownWhenNeitherFieldIsSet() {
+    let results = [CrawlPageResult(path: "/a", statusCode: 0, errorType: nil, errorDescription: nil, elapsedMS: 1)]
+    #expect(CrawlReport.groupByConstruct(results)[0].construct == "unknown")
+}
+
+@Test func groupByConstructSortsByGroupSizeDescendingThenKeyAscending() {
+    let results = [
+        CrawlPageResult(path: "/a", statusCode: 500, errorType: nil, errorDescription: "b-construct", elapsedMS: 1),
+        CrawlPageResult(path: "/b", statusCode: 500, errorType: nil, errorDescription: "a-construct", elapsedMS: 1),
+        CrawlPageResult(path: "/c", statusCode: 500, errorType: nil, errorDescription: "a-construct", elapsedMS: 1),
+    ]
+    let groups = CrawlReport.groupByConstruct(results)
+    #expect(groups.map(\.construct) == ["a-construct", "b-construct"])
+    #expect(groups[0].pages.count == 2)
+}
+
+@Test func failureClassBucketsByStatusCodeRange() {
+    func page(_ status: Int) -> CrawlPageResult {
+        CrawlPageResult(path: "/x", statusCode: status, errorType: nil, errorDescription: nil, elapsedMS: 1)
+    }
+    #expect(CrawlReport.failureClass(for: page(0)) == "timeout")
+    #expect(CrawlReport.failureClass(for: page(404)) == "4xx")
+    #expect(CrawlReport.failureClass(for: page(500)) == "5xx")
+    #expect(CrawlReport.failureClass(for: page(599)) == "5xx")
+}

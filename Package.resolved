@@ -1,5 +1,5 @@
 {
-  "originHash" : "cae4d1f8ac3312f74ed575a35972f6b949d163fc10ede45aed87dd12fe70c01c",
+  "originHash" : "461ffa26da5d62ac063bc11284436fc7c24c8abc2ef60794d5a5f18dfb52d9c3",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -44,15 +44,6 @@
       "state" : {
         "branch" : "main",
         "revision" : "adf441d79ca3520e73e77a3f8bb21f2109d2c415"
-      }
-    },
-    {
-      "identity" : "perfect-nio",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/taplin/Perfect-NIO.git",
-      "state" : {
-        "branch" : "main",
-        "revision" : "168870181176e3ea94ee55bd4c7990d2298d0734"
       }
     },
     {

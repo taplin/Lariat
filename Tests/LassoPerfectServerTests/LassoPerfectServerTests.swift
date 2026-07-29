@@ -1,6 +1,7 @@
 import Foundation
 import Testing
 @testable import LassoPerfectServer
+import LassoCrawlReport
 import LassoParser
 import PerfectAdminConsole
 import PerfectFileMakerAdminAPI
@@ -874,17 +875,23 @@ private func sampleDelegate(
     let actions = await delegate.availableActions()
     let crawl = actions.first { $0.name == "crawl-report" }
     #expect(crawl?.description.contains("Request every discovered site page") == true)
+    #expect(crawl?.isRunning == false)
 }
 
-@Test func lassoAdminDelegateAvailableActionsShowsLiveProgressWhileRunning() async {
+// admin-console UI redesign phase 6: live progress moved from being folded into
+// `description` text to the dedicated `isRunning`/`lastResult` fields `AdminAction`
+// already has for exactly this — `description` now stays static regardless of
+// tracker state; `crawlTracker.statusDescription(fallback:)` (which still does the
+// text-folding) is unchanged and covered by its own CrawlRunTracker tests above.
+@Test func lassoAdminDelegateAvailableActionsReflectsRunningTrackerState() async {
     let tracker = CrawlRunTracker()
     await tracker.tryBegin()
     await tracker.progress(3, 10)
     let delegate = sampleDelegate(config: sampleServerConfig(), crawlTracker: tracker)
     let actions = await delegate.availableActions()
     let crawl = actions.first { $0.name == "crawl-report" }
-    #expect(crawl?.description.contains("3/10 pages") == true)
-    #expect(crawl?.description.contains("Running now") == true)
+    #expect(crawl?.isRunning == true)
+    #expect(crawl?.description.contains("Request every discovered site page") == true)
 }
 
 @Test func lassoAdminDelegateExecuteActionRejectsSecondCrawlWhileFirstIsRunning() async throws {
@@ -894,6 +901,64 @@ private func sampleDelegate(
     let result = try await delegate.executeAction("crawl-report")
     #expect(result.success == false)
     #expect(result.message.contains("already running"))
+}
+
+// MARK: - LassoAdminDelegate job history + structured action reports (admin-console UI redesign phase 6)
+
+@Test func lassoAdminDelegateCurrentJobDelegatesToCrawlTracker() async {
+    let tracker = CrawlRunTracker()
+    await tracker.tryBegin()
+    await tracker.progress(5, 20)
+    let delegate = sampleDelegate(config: sampleServerConfig(), crawlTracker: tracker)
+    let job = await delegate.currentJob()
+    #expect(job?.name == "crawl-report")
+    #expect(job?.completed == 5)
+}
+
+@Test func lassoAdminDelegateRecentJobRunsDelegatesToCrawlTracker() async {
+    let tracker = CrawlRunTracker()
+    await tracker.tryBegin()
+    await tracker.finish(summary: "done", results: [], excludedCount: 0, abortedByCircuitBreaker: false)
+    let delegate = sampleDelegate(config: sampleServerConfig(), crawlTracker: tracker)
+    let runs = await delegate.recentJobRuns()
+    #expect(runs.count == 1)
+    #expect(runs[0].name == "crawl-report")
+}
+
+@Test func lassoAdminDelegateActionReportReturnsNilForUnknownActionName() async {
+    let delegate = sampleDelegate(config: sampleServerConfig())
+    #expect(await delegate.actionReport(for: "not-a-real-action") == nil)
+}
+
+@Test func lassoAdminDelegateActionReportReturnsNilForCrawlReportBeforeAnyRun() async {
+    let delegate = sampleDelegate(config: sampleServerConfig())
+    #expect(await delegate.actionReport(for: "crawl-report") == nil)
+}
+
+@Test func lassoAdminDelegateActionReportReflectsMostRecentCrawl() async {
+    let tracker = CrawlRunTracker()
+    await tracker.tryBegin()
+    let results = [
+        CrawlPageResult(path: "/ok", statusCode: 200, errorType: nil, errorDescription: nil, elapsedMS: 1),
+        CrawlPageResult(path: "/bad", statusCode: 404, errorType: "x", errorDescription: "notFound", elapsedMS: 1),
+    ]
+    await tracker.finish(summary: "1 failing", results: results, excludedCount: 0, abortedByCircuitBreaker: false)
+    let delegate = sampleDelegate(config: sampleServerConfig(), crawlTracker: tracker)
+    let report = await delegate.actionReport(for: "crawl-report")
+    #expect(report?.actionName == "crawl-report")
+    #expect(report?.groups.first?.rows.first?.status == "4xx")
+}
+
+// MARK: - LassoAdminDelegate CWP Janitor alert tag (admin-console UI redesign phase 6)
+
+@Test func lassoAdminDelegateStatusSectionFlagsModeAsAlertOnlyWhenArmed() async {
+    let armedDelegate = sampleDelegate(config: sampleServerConfig(cwpJanitorEnabled: true, cwpJanitorDryRun: false))
+    let armedSection = await armedDelegate.additionalStatusSections().first { $0.title == "CWP Session Janitor" }
+    #expect(armedSection?.alertKeys == ["Mode"])
+
+    let dryRunDelegate = sampleDelegate(config: sampleServerConfig(cwpJanitorEnabled: true, cwpJanitorDryRun: true))
+    let dryRunSection = await dryRunDelegate.additionalStatusSections().first { $0.title == "CWP Session Janitor" }
+    #expect(dryRunSection?.alertKeys.isEmpty == true)
 }
 
 // MARK: - CWP session janitor wiring (thin — the actual selection/sweep
@@ -987,10 +1052,16 @@ private func sampleDelegate(
     let tracker = CrawlRunTracker()
     await tracker.tryBegin()
     await tracker.progress(10, 10)
-    await tracker.finish(summary: "Last run: 10 page(s), 9 clean, 1 failing, 0 excluded (finished 1:00 PM).")
+    let results = (1...9).map { CrawlPageResult(path: "/p\($0)", statusCode: 200, errorType: nil, errorDescription: nil, elapsedMS: 5) }
+        + [CrawlPageResult(path: "/broken", statusCode: 500, errorType: "unknownFunction", errorDescription: "unknownFunction(\"Output\")", elapsedMS: 5)]
+    await tracker.finish(
+        summary: "Last run: 10 page(s), 9 clean, 1 failing, 0 excluded (finished 1:00 PM).",
+        results: results, excludedCount: 0, abortedByCircuitBreaker: false
+    )
     #expect(await tracker.isRunning == false)
     let status = await tracker.statusDescription(fallback: "idle")
     #expect(status.contains("9 clean"))
+    #expect(await tracker.lastSummary?.contains("9 clean") == true)
     // A finished tracker allows starting again.
     #expect(await tracker.tryBegin() == true)
 }
@@ -1018,6 +1089,85 @@ private func sampleDelegate(
     let tracker = CrawlRunTracker()
     let status = await tracker.statusDescription(fallback: "idle description")
     #expect(status == "idle description")
+}
+
+// MARK: - CrawlRunTracker run history + currentJob/recentJobRuns (admin-console UI redesign phase 6)
+
+@Test func crawlRunTrackerCurrentJobIsNilWhenIdle() async {
+    let tracker = CrawlRunTracker()
+    #expect(await tracker.currentJob(name: "crawl-report") == nil)
+}
+
+@Test func crawlRunTrackerCurrentJobReflectsProgressWhileRunning() async {
+    let tracker = CrawlRunTracker()
+    await tracker.tryBegin()
+    await tracker.progress(3, 10)
+    let job = await tracker.currentJob(name: "crawl-report")
+    #expect(job?.name == "crawl-report")
+    #expect(job?.completed == 3)
+    #expect(job?.total == 10)
+}
+
+@Test func crawlRunTrackerRecentJobRunsIsEmptyBeforeAnyRunFinishes() async {
+    let tracker = CrawlRunTracker()
+    #expect(await tracker.recentJobRuns(name: "crawl-report").isEmpty)
+}
+
+@Test func crawlRunTrackerRecentJobRunsReflectsSucceededAndFailedRuns() async {
+    let tracker = CrawlRunTracker()
+    await tracker.tryBegin()
+    let cleanResults = [CrawlPageResult(path: "/a", statusCode: 200, errorType: nil, errorDescription: nil, elapsedMS: 1)]
+    await tracker.finish(summary: "all clean", results: cleanResults, excludedCount: 0, abortedByCircuitBreaker: false)
+
+    await tracker.tryBegin()
+    let failingResults = [CrawlPageResult(path: "/b", statusCode: 500, errorType: "x", errorDescription: "boom", elapsedMS: 1)]
+    await tracker.finish(summary: "one failing", results: failingResults, excludedCount: 0, abortedByCircuitBreaker: false)
+
+    let runs = await tracker.recentJobRuns(name: "crawl-report")
+    #expect(runs.count == 2)
+    // Most recent first.
+    #expect(runs[0].succeeded == false)
+    #expect(runs[0].summary == "one failing")
+    #expect(runs[1].succeeded == true)
+}
+
+@Test func crawlRunTrackerRecentJobRunsCapsAtHistoryCapacity() async {
+    let tracker = CrawlRunTracker(historyCapacity: 2)
+    for i in 1...3 {
+        await tracker.tryBegin()
+        await tracker.finish(summary: "run \(i)", results: [], excludedCount: 0, abortedByCircuitBreaker: false)
+    }
+    let runs = await tracker.recentJobRuns(name: "crawl-report")
+    #expect(runs.count == 2)
+    #expect(runs[0].summary == "run 3")
+    #expect(runs[1].summary == "run 2")
+}
+
+@Test func crawlRunTrackerActionReportIsNilBeforeAnyRunFinishes() async {
+    let tracker = CrawlRunTracker()
+    #expect(await tracker.actionReport(name: "crawl-report") == nil)
+}
+
+@Test func crawlRunTrackerActionReportGroupsFailuresByConstructMatchingCrawlReport() async {
+    let tracker = CrawlRunTracker()
+    await tracker.tryBegin()
+    let results = [
+        CrawlPageResult(path: "/clean", statusCode: 200, errorType: nil, errorDescription: nil, elapsedMS: 1),
+        CrawlPageResult(path: "/broken1", statusCode: 500, errorType: "x", errorDescription: "unknownFunction(\"Output\")", elapsedMS: 1),
+        CrawlPageResult(path: "/broken2", statusCode: 500, errorType: "x", errorDescription: "unknownFunction(\"Output\")", elapsedMS: 1),
+    ]
+    await tracker.finish(summary: "2 failing", results: results, excludedCount: 1, abortedByCircuitBreaker: false)
+
+    let report = await tracker.actionReport(name: "crawl-report")
+    #expect(report?.actionName == "crawl-report")
+    let stats = Dictionary(uniqueKeysWithValues: (report?.stats ?? []).map { ($0.label, $0.value) })
+    #expect(stats["Requested"] == "3")
+    #expect(stats["Clean"] == "1")
+    #expect(stats["Failing"] == "2")
+    #expect(stats["Excluded"] == "1")
+    #expect(report?.groups.count == 1)
+    #expect(report?.groups.first?.heading == "unknownFunction(\"Output\")")
+    #expect(report?.groups.first?.rows.count == 2)
 }
 
 // MARK: - RestartCoordinator (restart-server concurrency guard)

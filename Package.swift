@@ -23,7 +23,10 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/taplin/Perfect-CRUD.git", branch: "main"),
         .package(url: "https://github.com/taplin/Perfect-MySQL.git", branch: "main"),
-        .package(url: "https://github.com/taplin/Perfect-NIO.git", branch: "main"),
+        // TEMPORARY, local-dev-only override for admin-console Phase 6 (unreleased). See
+        // Documentation/admin-console.md for the revert steps once Perfect-NIO-admin-console's
+        // redesign work is pushed to origin/main and this can go back to a url:/branch: dependency.
+        .package(name: "Perfect-NIO", path: "../Perfect-NIO-admin-console"),
         .package(url: "https://github.com/taplin/Perfect-Session.git", branch: "main"),
         .package(url: "https://github.com/taplin/Perfect-FileMaker.git", branch: "main"),
         .package(url: "https://github.com/taplin/Perfect-FileMaker-AdminAPI.git", branch: "main"),

@@ -625,6 +625,38 @@ public enum CrawlReport {
         delegateQueue: nil
     )
 
+    /// Groups results by the actual failing construct (`errorDescription`, e.g.
+    /// `unknownFunction("Output")`), not `errorType` — the latter is just the
+    /// broad Swift error enum name (`LassoRuntimeError` covers
+    /// unknownFunction/unsupportedExpression/etc. alike) and would lump dozens
+    /// of genuinely distinct gaps into one bucket. Sorted by group size
+    /// descending, then key ascending — same ordering `printAndWrite` has
+    /// always used. Extracted so `printAndWrite` (stdout) and the admin
+    /// console's structured `actionReport(for:)` (JSON, admin-console UI
+    /// redesign phase 6) share one implementation instead of two that can drift.
+    public static func groupByConstruct(_ results: [CrawlPageResult]) -> [(construct: String, pages: [CrawlPageResult])] {
+        var byConstruct: [String: [CrawlPageResult]] = [:]
+        for result in results {
+            let key = result.errorDescription?.isEmpty == false ? result.errorDescription! : (result.errorType ?? "unknown")
+            byConstruct[key, default: []].append(result)
+        }
+        return byConstruct
+            .sorted { $0.value.count > $1.value.count || ($0.value.count == $1.value.count && $0.key < $1.key) }
+            .map { (construct: $0.key, pages: $0.value) }
+    }
+
+    /// Coarse failure-class bucket for the admin console's crawl-report filter
+    /// tags (admin-console UI redesign phase 6) — `"clean"`/`"excluded"` aren't
+    /// classified here since `groupByConstruct` only ever sees failing pages;
+    /// `statusCode == 0` matches `isBackendDistressSignal`'s own definition of
+    /// a genuine request-level failure (timeout/connection refused/reset).
+    public static func failureClass(for result: CrawlPageResult) -> String {
+        if result.statusCode == 0 { return "timeout" }
+        if (500..<600).contains(result.statusCode) { return "5xx" }
+        if (400..<500).contains(result.statusCode) { return "4xx" }
+        return "other"
+    }
+
     /// Groups failures by `errorType` (matching `LassoSubsetCrawler`'s
     /// existing counted-and-grouped report style), prints a summary to
     /// stdout, and — if `outputPath` is set — writes the full per-page
@@ -670,19 +702,9 @@ public enum CrawlReport {
         }
 
         if failing.isEmpty == false {
-            // Group by the actual construct (`errorDescription`, e.g.
-            // `unknownFunction("Output")`), not `errorType` — the latter is
-            // just the broad Swift error enum name (`LassoRuntimeError`
-            // covers unknownFunction/unsupportedExpression/etc. alike) and
-            // would lump dozens of genuinely distinct gaps into one bucket.
-            var byConstruct: [String: [CrawlPageResult]] = [:]
-            for result in failing {
-                let key = result.errorDescription?.isEmpty == false ? result.errorDescription! : (result.errorType ?? "unknown")
-                byConstruct[key, default: []].append(result)
-            }
             print("")
             print("Failures by first unsupported construct:")
-            for (construct, group) in byConstruct.sorted(by: { $0.value.count > $1.value.count || ($0.value.count == $1.value.count && $0.key < $1.key) }) {
+            for (construct, group) in groupByConstruct(failing) {
                 print("  \(construct.prefix(160)) — \(group.count) page\(group.count == 1 ? "" : "s")")
                 for page in group.prefix(5) {
                     print("    \(page.path)")

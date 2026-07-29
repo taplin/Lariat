@@ -2017,7 +2017,7 @@ struct LassoSiteServer: Sendable {
             emailProvider: emailProvider,
             diagnosticLogSink: { [logCapture] (message: String) async -> Void in
                 guard let logCapture else { return }
-                await logCapture.capture("[log_critical] " + message)
+                await logCapture.capture("[log_critical] " + message, isError: true)
             },
             stdoutSink: { (message: String) async -> Void in
                 FileHandle.standardOutput.write(Data(message.utf8))
@@ -2147,7 +2147,7 @@ struct LassoSiteServer: Sendable {
         )
         FileHandle.standardError.write(Data((details.logLine + "\n").utf8))
         if let logCapture {
-            Task { await logCapture.capture("[render-error] " + details.logLine) }
+            Task { await logCapture.capture("[render-error] " + details.logLine, isError: true) }
         }
 
         // The crawl/report mode (LASSO_CRAWL_REPORT=1, see CrawlReport.swift)
@@ -2246,7 +2246,7 @@ func logDatasourceActionFailure(
     let line = "Datasource action failed kind=\(kind) datasource=\(datasource) error=\(error)"
     FileHandle.standardError.write(Data((line + "\n").utf8))
     if let logCapture {
-        Task { await logCapture.capture("[datasource] " + line) }
+        Task { await logCapture.capture("[datasource] " + line, isError: true) }
     }
     if let datasourceFailureTracker {
         Task { await datasourceFailureTracker.recordFailure() }
