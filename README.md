@@ -22,7 +22,7 @@ If you have an existing Lasso site and are curious how much of it this server al
   brew install mysql-client
   ```
 
-  That's the only Homebrew package this needs. `libxml2` and `zlib` — the other two C libraries this project links against — resolve against macOS's own system copies automatically; you don't need to install anything for them. If you already have `libxml2` installed via Homebrew for an unrelated project, it can collide with the copy recent macOS SDKs now bundle directly and cause a "conflicting types" build failure — see [`Documentation/libxml2-pkgconfig-collision.md`](Documentation/libxml2-pkgconfig-collision.md) for the fix.
+  That's the only Homebrew package this needs. `libxml2` and `zlib` — the other two C libraries this project links against — resolve against macOS's own system copies automatically; you don't need to install anything for them, and having either one *also* installed via Homebrew for an unrelated project is fine too — both dependencies (`Perfect-XML`, `Perfect-NIO`) skip `pkg-config` for these on macOS specifically so a Homebrew copy can never collide with the SDK's own bundled headers. (Older pins predating that fix could still hit a "conflicting types" build failure — see [`Documentation/libxml2-pkgconfig-collision.md`](Documentation/libxml2-pkgconfig-collision.md) if you ever do.)
 
 ## Build
 

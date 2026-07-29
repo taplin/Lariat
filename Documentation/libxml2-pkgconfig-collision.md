@@ -1,5 +1,17 @@
 # Build failure: conflicting libxml2 declarations on recent macOS
 
+**Status: fixed at the source.** As of the fix described below, `Perfect-XML`'s
+`libxml2` system-library target no longer consults `pkg-config` on macOS at
+all, so this collision can no longer happen there regardless of what's
+installed via Homebrew — no manual remedy is needed on a fresh clone that
+picks up the fix. The manual remedies further down remain useful if you're
+pinned to an older `Perfect-XML` commit that predates it, or for the
+equivalent Linux case where `pkg-config` is still genuinely required.
+
+The same collision applied to `zlib` (Perfect-NIO's `CZlib` target, also
+bundled directly by recent SDKs) and got the identical fix there — see
+[`Perfect-NIO` PR #2](https://github.com/taplin/Perfect-NIO/pull/2).
+
 **Symptom**: `swift build`/`swift run` fails while building the `libxml2`
 system-library module (pulled in transitively via `Perfect-XML` →
 `Perfect-FileMaker`), with errors like:
@@ -49,6 +61,25 @@ Perfect-XML code issue.** Confirmed by:
   you don't need to install anything for them").
 
 ## Fix
+
+### Structural fix (upstream, in Perfect-XML)
+
+`Perfect-XML`'s `libxml2` system-library target (`Sources/libxml2` in
+[`Perfect-XML`](https://github.com/taplin/Perfect-XML)) now omits
+`pkgConfig` entirely on macOS. Verified empirically: with a synthetic
+competing `libxml-2.0.pc` on `PKG_CONFIG_PATH`, the pre-fix manifest passed
+its `-I` path straight into the module compile (`swift build -v` shows
+`-I/.../include/libxml2` from the fake prefix); the fixed manifest never
+does, on any macOS machine, regardless of what Homebrew has installed.
+`pkg-config` + the `apt` provider is retained on Linux, where there's no
+SDK-bundled copy and it's genuinely required.
+
+Picking up the fix just requires `Perfect-XML` resolving to a commit at or
+after it (all these dependencies track `branch: "main"`, so `swift package
+update` is enough — no version bump needed). No Homebrew uninstall, no
+`PKG_CONFIG_PATH` surgery, no wrapper scripts required.
+
+### Manual remedies (for pre-fix commits, or the Linux-equivalent case)
 
 Homebrew's `libxml2` is genuinely not needed to build Perfect-Lasso — the
 SDK's own bundled copy is sufficient. The safest fix removes the

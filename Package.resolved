@@ -52,7 +52,7 @@
       "location" : "https://github.com/taplin/Perfect-NIO.git",
       "state" : {
         "branch" : "main",
-        "revision" : "168870181176e3ea94ee55bd4c7990d2298d0734"
+        "revision" : "cec7a289a383fbd6e6efee929b9679872b1dfab3"
       }
     },
     {
@@ -106,7 +106,7 @@
       "location" : "https://github.com/taplin/Perfect-XML.git",
       "state" : {
         "branch" : "main",
-        "revision" : "43cab4b58d5a0bd0b430e6b6708e0e97814d63ae"
+        "revision" : "27f00b7130b8d746dccb4ec4f0e8acd940d670a2"
       }
     },
     {
