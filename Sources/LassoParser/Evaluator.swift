@@ -391,10 +391,13 @@ struct Evaluator {
             // argument list, rather than passing the array itself as one
             // argument. Real corpus (zeroloop/ds's ds.lasso):
             // `.dsinfo->extend(:#rest || staticarray)`, forwarding a
-            // `...`-collected rest array on to another call. A `.pair`
-            // element becomes a keyword argument (real corpus's own
-            // `#rest` entries are `pair`/`keyword`-shaped for whatever
-            // was passed by name); anything else becomes positional.
+            // `...`-collected rest array on to another call. A
+            // `.keyword` element becomes a keyword argument again (real
+            // corpus's own `#rest` entries are `.keyword`-shaped for
+            // whatever was passed by name, per `bindParameters` above);
+            // anything else — including an ordinary `.pair`, which is
+            // NOT the same thing (see `.keyword`'s own doc comment in
+            // Runtime.swift) — becomes positional, unchanged.
             // `ExpressionParser.parseArguments(closing:)` marks this
             // shape with the sentinel label `":"`, produced only when a
             // bare `:` immediately opens an actual call's argument list
@@ -409,8 +412,8 @@ struct Evaluator {
                 default: elements = [unpacked]
                 }
                 for element in elements {
-                    if case let .pair(key, value) = element {
-                        results.append(EvaluatedArgument(label: key.outputString, value: value))
+                    if case let .keyword(name, value) = element {
+                        results.append(EvaluatedArgument(label: name, value: value))
                     } else {
                         results.append(EvaluatedArgument(label: nil, value: element))
                     }
@@ -1505,6 +1508,20 @@ struct Evaluator {
         var positionalIndex = 0
         var bound: [String: LassoLocalBox] = [:]
 
+        // Ch. "Defining Methods" > "Rest Parameters": "any additional
+        // parameters are placed into" the rest local -- for a call
+        // against a signature that's entirely `(...)` (real corpus:
+        // zeroloop/ds's `public search(...) => {...}`), that means
+        // EVERY argument, keyword or positional. Keyword matching is by
+        // NAME, independent of where `...` sits in the signature, so
+        // this is computed once, up front, from every declared
+        // (non-rest) parameter name -- not incrementally as the loop
+        // below reaches each one.
+        let declaredNames = Set(parameters.compactMap { parameter -> String? in
+            guard parameter.label != "..." else { return nil }
+            return Self.parameterNameAndDefault(parameter.value).0?.lowercased()
+        })
+
         for parameter in parameters {
             // Ch. "Defining Methods" > "Rest Parameters": "any additional
             // parameters are placed into a predefined local variable
@@ -1515,11 +1532,35 @@ struct Evaluator {
             // argument gets produced.
             if parameter.label == "..." {
                 let name = Self.parameterNameAndDefault(parameter.value).0 ?? "rest"
-                let remaining = Array(positional[positionalIndex...])
+                // Walk the ORIGINAL call in order, keeping whatever
+                // wasn't claimed by a named parameter: a keyword whose
+                // name matches no declared parameter survives as a
+                // genuine `.keyword` (NOT `.pair` -- real corpus,
+                // ds.lasso's own `with p in delve(#rest) do {
+                // if(#p->isa(::keyword) ...`, distinguished from an
+                // ordinary `pair` passed positionally, see `.keyword`'s
+                // own doc comment in Runtime.swift for why collapsing
+                // the two broke real search-criteria handling entirely);
+                // a positional argument survives once its own index
+                // reaches however many named parameters already claimed
+                // positionally (tracked the same way the loop below
+                // itself consumes `positional`, just computed in one
+                // pass here since the rest parameter can appear before
+                // some of those named parameters are even processed).
+                var positionalSeen = 0
+                let remaining: [LassoValue] = callArguments.compactMap { argument in
+                    if let label = argument.label {
+                        return declaredNames.contains(label.lowercased())
+                            ? nil
+                            : .keyword(label, argument.value)
+                    }
+                    defer { positionalSeen += 1 }
+                    return positionalSeen >= positionalIndex ? argument.value : nil
+                }
                 positionalIndex = positional.count
                 bound[name.lowercased()] = remaining.isEmpty
                     ? LassoLocalBox(.void)
-                    : LassoLocalBox(.array(remaining.map(\.value)))
+                    : LassoLocalBox(.array(remaining))
                 continue
             }
             let (name, defaultExpression) = Self.parameterNameAndDefault(parameter.value)
@@ -2846,6 +2887,18 @@ struct Evaluator {
             return try await invokeCapture(capture, arguments: try await evaluate(arguments), updatesAutoCollectBuffer: false)
         case let (.pair(key, _), "first"): return key
         case let (.pair(_, value), "second"): return value
+        // `->name`/`->value` -- real corpus (zeroloop/ds's ds.lasso)
+        // calls these on a PLAIN pair too (its `else(#p->isa(::pair))`
+        // branch: `#columns->insert((:#p->name,#op,...))`), not just on
+        // a genuine `.keyword` -- so `pair` has real `->name`/`->value`
+        // accessors of its own, aliasing `->first`/`->second`; `keyword`
+        // gets the same pair below. What actually distinguishes them is
+        // ONLY `isa(::keyword)` (`.keyword`'s own doc comment in
+        // Runtime.swift), never accessor availability.
+        case let (.pair(key, _), "name"): return key
+        case let (.pair(_, value), "value"): return value
+        case let (.keyword(name, _), "name"): return .string(name)
+        case let (.keyword(_, value), "value"): return value
         case (.pair, "size"):
             // Ch. 30 p.404 Note: "For compatibility with maps and
             // arrays the [Pair->Size] tag always returns 2".

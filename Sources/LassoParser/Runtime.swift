@@ -26,6 +26,26 @@ public indirect enum LassoValue: Equatable, Sendable {
     /// `$skuArrayItem->insert(field('scrubs_sku') = $temp_array)`, read
     /// back via `->second` (includes/detail_by_color.lasso).
     case pair(LassoValue, LassoValue)
+    /// A real Lasso 9 `keyword` — the DISTINCT type produced when a
+    /// call argument's label doesn't match any of the callee's declared
+    /// parameters and lands in a `...` rest parameter instead (Ch.
+    /// "Defining Methods" > "Rest Parameters"). NOT interchangeable
+    /// with `.pair` even though both are a name/value shape: real
+    /// corpus (zeroloop/ds's ds.lasso) explicitly branches on telling
+    /// them apart — `if(#p->isa(::keyword) || <legacy dash-prefixed
+    /// pair>) => { <handle a reserved CONTROL option like -table/
+    /// -database/-sortcolumn> } else(#p->isa(::pair)) => { <register an
+    /// ordinary column=value SEARCH CRITERION> }`. An earlier version
+    /// of this fix made `.pair` itself satisfy `isa(::keyword)` (mirroring
+    /// how `staticarray` stands in for `array` elsewhere) — but that
+    /// collapsed the exact distinction ds.lasso depends on: an ordinary,
+    /// explicitly-constructed `Pair('style_number', '4100')` passed
+    /// positionally would ALSO report `isa(::keyword)`, so EVERY search
+    /// criterion (however called) fell into the reserved-option branch
+    /// and never reached `#columns->insert(...)` — nothing ever
+    /// filtered. A genuinely separate case is what real Lasso 9's own
+    /// type system has here.
+    case keyword(String, LassoValue)
     /// A Lasso 9 Capture — see `Captures.swift`'s own doc comment for the
     /// full design (real live-reference closure semantics as of Stage 3).
     case capture(LassoCaptureValue)
@@ -41,6 +61,7 @@ public indirect enum LassoValue: Equatable, Sendable {
         case let .map(value): !value.isEmpty
         case .object: true
         case .pair: true
+        case .keyword: true
         case .capture: true
         }
     }
@@ -111,6 +132,12 @@ public indirect enum LassoValue: Equatable, Sendable {
             // reading Ch. 30's Pair section for Stage 4's `->First=`/
             // `->Second=` work.
             "(\(key.outputString))=(\(value.outputString))"
+        case let .keyword(name, value):
+            // No documented bare-output contract found for `keyword`
+            // specifically -- mirrors `pair`'s own `(key)=(value)`
+            // format immediately above for consistency, flagged as
+            // unconfirmed rather than presented as doc-verified.
+            "(\(name))=(\(value.outputString))"
         case .capture:
             // No documented bare-output contract found for a capture
             // value (unlike `bytes`/List/Set/etc.'s own worked examples)
@@ -143,6 +170,7 @@ public indirect enum LassoValue: Equatable, Sendable {
         case .map: "map"
         case let .object(value): value.typeName
         case .pair: "pair"
+        case .keyword: "keyword"
         case .capture: "capture"
         }
     }
@@ -2002,6 +2030,8 @@ extension LassoValue {
             value.snapshotData().mapValues(\.jsonObject)
         case let .pair(key, value):
             ["first": key.jsonObject, "second": value.jsonObject]
+        case let .keyword(name, value):
+            ["name": name, "value": value.jsonObject]
         case .capture:
             // A capture (stored code + a locals snapshot) has no
             // meaningful JSON representation — this conversion exists for
