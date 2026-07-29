@@ -777,6 +777,35 @@ public struct LassoNativeRegistry: Sendable {
                 return argument.value
             })
         }
+        // Real Lasso 9 built-in (language reference confirms an
+        // `obj/delve` entry with a `->forEach` member, though every
+        // reference-site mirror tried returned a 500/SSL error rather
+        // than the actual page content at the time this was written --
+        // flagged here since it couldn't be doc-verified the way this
+        // codebase's other fixes are). Modeled on its one known
+        // real-corpus usage (zeroloop/ds's ds.lasso): `with p in
+        // delve(#rest) do { ... }`, walking a `...`-collected
+        // rest-parameter array that may itself contain nested
+        // arrays/staticarrays and needs them flattened into ONE flat
+        // sequence for uniform iteration -- recursively flattening
+        // nested arrays is "delve"'s meaning in every other language
+        // with this operation (flatMap/flatten), and is safe even if
+        // wrong in some untested edge case: when the input has no
+        // nested arrays (ds.lasso's own common case), delve(x) is
+        // identical to x itself. Never flattens `.pair` -- ds.lasso's
+        // own loop body checks `#p->isa(::pair)` on each delved
+        // element, so a keyword argument must survive as one pair, not
+        // be decomposed into its key and value as two separate leaves.
+        register("delve") { arguments, _ in
+            guard let first = arguments.first else { return .array([]) }
+            func flatten(_ value: LassoValue) -> [LassoValue] {
+                if case let .array(elements) = value {
+                    return elements.flatMap(flatten)
+                }
+                return [value]
+            }
+            return .array(flatten(first.value))
+        }
         // Real Lasso's Pair constructor (LassoGuide, "Collections"):
         // pair() -> both null; pair(anotherPair) -> copies first/second;
         // pair(value, value) -> two positional elements; pair(value=value)
