@@ -136,6 +136,22 @@ enum LassoMysqldsConnector {
             }
         }
 
+        // General (non-key) search criteria — real corpus's own
+        // `dsinfo->extend` (ds.lasso) populates THIS field, not
+        // `keycolumns`, for an ordinary `->search()`/`->findrows()` call
+        // (`#columns->size ? #dsinfo->inputcolumns = #columns->
+        // asstaticarray`), building the exact same `(field, operator,
+        // value)` 3-element tuple shape `criterionArguments(from:)`
+        // already parses for `keycolumns` above. Previously never read
+        // at all -- every search criterion, however it reached
+        // `dsinfo`, was silently dropped, and `->search()`/`->findrows()`
+        // always returned the whole table.
+        if case let .array(inputTuples) = dsinfo.value(for: "inputcolumns") {
+            for tuple in inputTuples {
+                arguments.append(contentsOf: try criterionArguments(from: tuple))
+            }
+        }
+
         if case let .array(returnColumns) = dsinfo.value(for: "returncolumns") {
             for column in returnColumns {
                 let name = column.outputString
