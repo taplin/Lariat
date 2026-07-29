@@ -368,6 +368,27 @@ struct ScriptBodyParser {
             return false
         }
         skipHorizontalWhitespace()
+
+        // `define ExistingType->methodName(...) => { ... }` — Ch.
+        // "Types" > "Adding methods to an existing type" ("type
+        // reopening"): "Lasso permits types to have methods added to
+        // them outside of the original defining type expression," for
+        // ANY type, custom or built-in/native (real corpus, zeroloop/ds:
+        // `define dsinfo->extend(...)`, `define map->forEachNode2 => ...`,
+        // `define null->asinteger => ...`). `name` so far is the type
+        // being extended; re-read it as the method actually being added.
+        var typeExtensionTarget: String? = nil
+        if matches("->") {
+            typeExtensionTarget = name
+            index += 2
+            name = readIdentifier()
+            guard !name.isEmpty else {
+                diagnostics.append(Diagnostic(message: "Malformed 'define \(typeExtensionTarget!)->': expected a method name", range: range))
+                index = start
+                return false
+            }
+            skipHorizontalWhitespace()
+        }
         // Ch. "Types" > "Custom Getters and Setters": `public firstName=
         // (value) => {...}` -- a method NAME ending in `=`, called via
         // `#someone->firstName = "Bob"`. Real corpus (zeroloop/ds's
@@ -407,6 +428,49 @@ struct ScriptBodyParser {
         // same line. Full trivia skipping (whitespace and comments, not
         // just same-line spaces) here is what makes that layout parse.
         skipTrivia()
+
+        if let typeName = typeExtensionTarget {
+            // Never a nested `type { ... }` here — reopening a type to
+            // add ONE method has no use for redeclaring a whole type
+            // inside that method's body. Only the two ordinary
+            // method-body shapes matter: real corpus (zeroloop/ds) uses
+            // both — `define dsinfo->extend(...) => { ... }` (braced)
+            // and `define null->asinteger => integer(self)` /
+            // `define map->forEachNode2 => .forEachNode => givenBlock`
+            // (bare-expression, mirroring the free-tag path below).
+            let methodBody: [LassoNode]
+            if index < characters.count, characters[index] == "{" {
+                let bodySource = readBalanced(open: "{", close: "}")
+                skipLineRemainder()
+                var nestedParser = ScriptBodyParser(source: bodySource, range: range)
+                let flatNestedBody = nestedParser.parse()
+                diagnostics.append(contentsOf: nestedParser.diagnostics)
+                mergeFires(from: nestedParser.openFormFires)
+                var nestedBuilder = BlockBuilder(nodes: flatNestedBody, diagnostics: [], openFormFires: [:])
+                let nestedResult = nestedBuilder.build()
+                diagnostics.append(contentsOf: nestedResult.diagnostics)
+                methodBody = nestedResult.nodes
+            } else {
+                let expressionSource = readStatement()
+                let trimmedExpression = expressionSource.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !trimmedExpression.isEmpty else {
+                    diagnostics.append(Diagnostic(message: "Malformed 'define \(typeName)->\(name) => ': expected an expression or '{'", range: range))
+                    index = start
+                    return false
+                }
+                var expressionParser = ExpressionParser("return(\(trimmedExpression))")
+                methodBody = [.code(expressionParser.parseList(), .lasso9, .lassoscript, range)]
+            }
+            let method = LassoMethodDefinition(
+                name: name,
+                parameters: parameters,
+                returnType: nil,
+                visibility: .public,
+                body: methodBody
+            )
+            nodes.append(.typeMethodExtension(typeName: typeName, method: method, .lasso9, range))
+            return true
+        }
 
         if readKeyword("type") {
             skipTrivia()

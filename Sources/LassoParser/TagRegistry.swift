@@ -78,6 +78,34 @@ public final class LassoTagRegistry: @unchecked Sendable {
         types[definition.name.lowercased()] = definition
     }
 
+    /// `define ExistingType->methodName(...) => { ... }` ("type
+    /// reopening") — ADDS one method to whatever `typeName` already
+    /// resolves to, unlike `registerType` above (which fully replaces).
+    /// Preserves any existing data members and methods (including a
+    /// built-in entry like `dsinfo`'s, seeded in `init()` above); a
+    /// method sharing an existing method's name replaces just that one,
+    /// matching real Lasso's redefinition behavior. Creates a minimal
+    /// entry (no data members, just this method) if `typeName` has no
+    /// entry at all yet — real corpus (zeroloop/ds) reopens `map` and
+    /// `null`, neither of which has one.
+    public func registerTypeExtension(_ typeName: String, method: LassoMethodDefinition) {
+        lock.lock()
+        defer { lock.unlock() }
+        let key = typeName.lowercased()
+        let existing = types[key]
+        var methods = existing?.methods ?? []
+        if let index = methods.firstIndex(where: { $0.name.caseInsensitiveCompare(method.name) == .orderedSame }) {
+            methods[index] = method
+        } else {
+            methods.append(method)
+        }
+        types[key] = LassoTypeDefinition(
+            name: existing?.name ?? typeName,
+            dataMembers: existing?.dataMembers ?? [],
+            methods: methods
+        )
+    }
+
     public func type(named name: String) -> LassoTypeDefinition? {
         lock.lock()
         defer { lock.unlock() }

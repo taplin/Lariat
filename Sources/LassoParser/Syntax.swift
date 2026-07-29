@@ -342,6 +342,18 @@ public indirect enum LassoNode: Equatable, Sendable {
         range: SourceRange
     )
     case typeDefinition(LassoTypeDefinition, LassoDialect, SourceRange)
+    /// `define ExistingType->methodName(...) => { ... }` — Ch. "Types" >
+    /// "Adding methods to an existing type" ("type reopening"): "Lasso
+    /// permits types to have methods added to them outside of the
+    /// original defining type expression." Unlike `.typeDefinition`
+    /// (a full `type { ... }` declaration, registered as a fresh,
+    /// replacing entry), this ADDS one method to whatever type
+    /// `typeName` already resolves to — a Lasso-defined type from an
+    /// earlier `.typeDefinition`, a built-in native type (real corpus,
+    /// zeroloop/ds: `dsinfo`, `map`, `null`), or a type not yet seen at
+    /// all (the extension itself creates a minimal entry). See
+    /// `LassoTagRegistry.registerTypeExtension(_:method:)`.
+    case typeMethodExtension(typeName: String, method: LassoMethodDefinition, LassoDialect, SourceRange)
 
     /// Every case's trailing `SourceRange` — used to attach a "failed at
     /// line N" location to a render error at the point it's first thrown,
@@ -353,7 +365,8 @@ public indirect enum LassoNode: Equatable, Sendable {
              let .tag(_, _, _, _, range),
              let .code(_, _, _, range),
              let .block(_, _, _, _, _, range),
-             let .typeDefinition(_, _, range):
+             let .typeDefinition(_, _, range),
+             let .typeMethodExtension(_, _, _, range):
             range
         }
     }

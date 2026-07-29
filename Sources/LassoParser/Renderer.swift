@@ -160,6 +160,8 @@ private struct RendererEngine {
                     )
                 case let .typeDefinition(definition, _, _):
                     evaluator.context.tagRegistry.registerType(definition)
+                case let .typeMethodExtension(typeName, method, _, _):
+                    evaluator.context.tagRegistry.registerTypeExtension(typeName, method: method)
                 case .tag:
                     continue
                 }
