@@ -268,20 +268,20 @@ struct Evaluator {
                 if case let .capture(capture) = calleeValue {
                     return try await invokeCapture(capture, arguments: try await evaluate(arguments))
                 }
-                // `#creator(#1)` — Ch. "Operators" > escape method
-                // operators: a "memberstream" (this codebase's
-                // "tagreference" object — `\name`/`\#variable`) is
-                // documented as supporting direct invocation with `()`,
-                // not just `->invoke(...)` — real corpus (zeroloop/ds's
-                // ds_result.lasso): `public rows(creator::memberstream)
-                // => { ... #creator(#1) ... }`, where the caller passes
-                // a `\methodName`-style reference through as an ordinary
-                // parameter and calls it bare. Delegates to the exact
-                // same native `"invoke"` method `->invoke(...)` itself
-                // dispatches to (`NativeTypes.swift`'s
-                // `makeTagReferenceType`) rather than duplicating its
-                // custom-tag/native-function fallback chain here.
-                if case let .object(object) = calleeValue, object.typeName == LassoTagReferenceValue.typeName {
+                // `#row(::column)` — Ch. "Operators" > "Invocation":
+                // "Invoking an object by applying parentheses is always
+                // equivalent to directly calling the method named
+                // `invoke`" — a general Lasso 9 mechanism for ANY object
+                // type, not special to memberstream/tagreference (that
+                // was this case's prior, too-narrow restriction). Real
+                // corpus (zeroloop/ds's ds_row.lasso): `public
+                // invoke(col::string) => .find(#col)`, called via
+                // `#row(::column)`; also covers the pre-existing
+                // memberstream case (`#creator(#1)`, ds_result.lasso)
+                // since a tagreference's `->invoke` is just another
+                // native method reached through the same generic
+                // dispatch in `member(...)`.
+                if case .object = calleeValue {
                     return try await member(calleeValue, "invoke", arguments, isQuoted: false)
                 }
                 throw LassoRuntimeError.unsupportedExpression("Dynamic call")
