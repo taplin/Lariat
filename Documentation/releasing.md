@@ -88,7 +88,8 @@ each release, not after the fact.
   colon-splat call arguments, type reopening (`define ExistingType->method`), a distinct `keyword`
   value type, `delve()`, `dsinfo->inputcolumns` search-criteria translation, `->asstaticarray`.
   Admin console Phase 6: real crawl-report wiring, job history, alert tags. Picks up Perfect-XML's
-  and Perfect-NIO's matching macOS libxml2/zlib pkg-config collision fixes. 1128/1128 tests pass.
+  and Perfect-NIO's matching macOS libxml2/zlib pkg-config collision fixes. 1128/1128 tests pass on
+  both macOS and Linux (`perfect-ci` container).
 - **`v0.2.3`** (2026-07-27) — dependency-only patch, no Perfect-Lasso source changes. Pulls in
   Perfect-CRUD's ADR-0001 connection pooling (`DatabaseConnectionPool`) and async execution
   boundary, plus its `CRUDTableStructure()` visibility fix (was `internal`, broke every host
