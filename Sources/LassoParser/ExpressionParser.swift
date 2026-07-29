@@ -1348,6 +1348,25 @@ struct ExpressionParser {
         let previousDepth = enclosingCallArgumentListDepth
         enclosingCallArgumentListDepth += 1
         defer { enclosingCallArgumentListDepth = previousDepth }
+        // `callee(:someArray)` — Ch. "Operators" > "Invocation": "including
+        // a colon after the opening parenthesis" unpacks an array's
+        // elements into the call's OWN argument list, instead of passing
+        // the array as one positional argument. Only meaningful as the
+        // ENTIRE argument list of a real wrapped call (`closing != nil` —
+        // a bare colon-call has no parens of its own for this to open
+        // inside of), and only at the very start (nothing parsed yet).
+        // Real corpus (zeroloop/ds's ds.lasso): `.dsinfo->extend(:#rest ||
+        // staticarray)`. Reuses the exact same comma-list parsing as the
+        // sibling staticarray-LITERAL shape (`(: 1, 2, 3)`, handled in
+        // `parsePrimary`'s `.symbol("(") where peek == .symbol(":")` case)
+        // — the grammar is identical; only what `Evaluator.evaluate(_
+        // arguments:)` does with the `":"`-labeled result differs (splat
+        // vs. build-one-array-value).
+        if closing != nil, peek == .symbol(":") {
+            index += 1
+            let elements = parseArguments(closing: closing)
+            return [LassoArgument(label: ":", value: .call(callee: .identifier("array"), arguments: elements))]
+        }
         while peek != .eof {
             if let closing, consume(closing) { break }
             // A bare-colon-call's argument list (`closing == nil` — no

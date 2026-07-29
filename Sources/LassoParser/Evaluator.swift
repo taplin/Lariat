@@ -385,6 +385,38 @@ struct Evaluator {
         var results: [EvaluatedArgument] = []
         results.reserveCapacity(arguments.count)
         for argument in arguments {
+            // `callee(:someArray)` — Ch. "Operators" > "Invocation":
+            // "including a colon after the opening parenthesis" unpacks
+            // an array/staticarray's own elements into the CALL's
+            // argument list, rather than passing the array itself as one
+            // argument. Real corpus (zeroloop/ds's ds.lasso):
+            // `.dsinfo->extend(:#rest || staticarray)`, forwarding a
+            // `...`-collected rest array on to another call. A `.pair`
+            // element becomes a keyword argument (real corpus's own
+            // `#rest` entries are `pair`/`keyword`-shaped for whatever
+            // was passed by name); anything else becomes positional.
+            // `ExpressionParser.parseArguments(closing:)` marks this
+            // shape with the sentinel label `":"`, produced only when a
+            // bare `:` immediately opens an actual call's argument list
+            // (never for an ordinary argument, so this can't collide
+            // with a real keyword named literally `:`).
+            if argument.label == ":" {
+                let unpacked = try await evaluate(argument.value)
+                let elements: [LassoValue]
+                switch unpacked {
+                case let .array(values): elements = values
+                case .void, .null: elements = []
+                default: elements = [unpacked]
+                }
+                for element in elements {
+                    if case let .pair(key, value) = element {
+                        results.append(EvaluatedArgument(label: key.outputString, value: value))
+                    } else {
+                        results.append(EvaluatedArgument(label: nil, value: element))
+                    }
+                }
+                continue
+            }
             if argument.label == nil, case let .assignment(target, value) = argument.value {
                 if case let .variable(name, scope) = target {
                     // `#dynamicField = value` — a real variable on the
