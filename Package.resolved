@@ -16,7 +16,7 @@
       "location" : "https://github.com/taplin/Perfect-CRUD.git",
       "state" : {
         "branch" : "main",
-        "revision" : "f01b8c0450fc2738f28fc252fb080dba04a6cc3c"
+        "revision" : "ed36835d9ce82d3ced51a77a6fbf4a532e3df1c2"
       }
     },
     {
@@ -43,7 +43,7 @@
       "location" : "https://github.com/taplin/Perfect-MySQL.git",
       "state" : {
         "branch" : "main",
-        "revision" : "adf441d79ca3520e73e77a3f8bb21f2109d2c415"
+        "revision" : "c626a8980a825048c9486f0403bfec645e284e38"
       }
     },
     {
@@ -52,7 +52,7 @@
       "location" : "https://github.com/taplin/Perfect-NIO.git",
       "state" : {
         "branch" : "main",
-        "revision" : "cec7a289a383fbd6e6efee929b9679872b1dfab3"
+        "revision" : "dce873a131304cc07008f2c06ff71630d1f82477"
       }
     },
     {
@@ -97,7 +97,7 @@
       "location" : "https://github.com/taplin/Perfect-SQLite.git",
       "state" : {
         "branch" : "main",
-        "revision" : "0162796ce323cdd9d7cd84d6c24c4645fe82767d"
+        "revision" : "7c325819427e73cf2a6c372208d4461bbc294606"
       }
     },
     {
@@ -159,8 +159,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-certificates.git",
       "state" : {
-        "revision" : "89fbc3714264cce8db8e4ec51b64e01c3e28c6c5",
-        "version" : "1.19.3"
+        "revision" : "449dbbecd0f31e82b510ada227ca152caa8b5e98",
+        "version" : "1.19.4"
       }
     },
     {

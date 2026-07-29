@@ -150,7 +150,10 @@ final class LassoAdminDelegate: AdminConsoleDelegate {
         }
         return [
             AdminStatusSection(title: "Lasso Site", items: items),
-            AdminStatusSection(title: "CWP Session Janitor", items: await cwpJanitorStatusItems()),
+            // "Mode" (dry-run vs ARMED) is the one value here worth an operator's immediate
+            // attention when scanning Settings quickly — an alert-styled tag when ARMED,
+            // matching the Needs-attention card's visual language.
+            AdminStatusSection(title: "CWP Session Janitor", items: await cwpJanitorStatusItems(), alertKeys: config.cwpJanitorEnabled && !config.cwpJanitorDryRun ? ["Mode"] : []),
         ]
     }
 
@@ -189,33 +192,34 @@ final class LassoAdminDelegate: AdminConsoleDelegate {
     /// at startup) calls `exit(0)` after printing results, and this action
     /// deliberately does not reuse that code path.
     ///
-    /// The action's `description` is built fresh on every call from
-    /// `crawlTracker`, so a currently-running crawl shows live "N/M pages"
-    /// progress on its chip, and an idle one shows the last run's summary
-    /// instead of a static blurb — `AdminWebUI`'s dashboard re-fetches
-    /// `/api/actions` on every periodic refresh, so this updates live.
+    /// `isRunning`/`lastResult` are read fresh from each action's own tracker on every call —
+    /// `description` stays static (what the action does), with live/most-recent state carried
+    /// by those two dedicated fields instead of folded into the description text (the
+    /// pre-redesign approach, before `AdminAction` had `isRunning`/`lastResult` to use).
+    /// `AdminWebUI`'s dashboard re-fetches `/api/actions` on every periodic refresh, so both
+    /// update live without a reload.
     func availableActions() async -> [AdminAction] {
-        let description = await crawlTracker.statusDescription(
-            fallback: "Request every discovered site page over real HTTP and log a pass/fail summary. Runs in the background, paced between requests to avoid overloading datasource backends (LASSO_CRAWL_REQUEST_DELAY_MS), and aborts early if the backend starts failing repeatedly (LASSO_CRAWL_CIRCUIT_BREAKER_THRESHOLD) — can take several minutes on a large site."
-        )
-        var restartDescription = "Spawn a fresh instance, confirm it's healthy, then hand off — the running site keeps serving throughout, no dropped connections. Also how an edited datasource config file gets picked up without a rebuild."
-        if config.sessionDriver == "memory" {
-            restartDescription += " Uses the in-memory session driver: every logged-in visitor's session is lost on handoff."
-        }
+        let crawlRunning = await crawlTracker.isRunning
         var actions = [
             AdminAction(
                 name: "crawl-report",
                 label: "Run Crawl Report",
-                description: description,
+                description: "Request every discovered site page over real HTTP and log a pass/fail summary. Runs in the background, paced between requests to avoid overloading datasource backends (LASSO_CRAWL_REQUEST_DELAY_MS), and aborts early if the backend starts failing repeatedly (LASSO_CRAWL_CIRCUIT_BREAKER_THRESHOLD) — can take several minutes on a large site.",
                 category: "data",
-                isDestructive: false
+                isDestructive: false,
+                isRunning: crawlRunning,
+                lastResult: await crawlTracker.lastSummary
             ),
             AdminAction(
                 name: "restart-server",
                 label: "Restart Server",
-                description: restartDescription,
+                description: "Spawn a fresh instance, confirm it's healthy, then hand off — the running site keeps serving throughout, no dropped connections. Also how an edited datasource config file gets picked up without a rebuild.",
                 category: "maintenance",
-                isDestructive: true
+                isDestructive: true,
+                isRunning: await restartCoordinator.isRestarting,
+                consequence: config.sessionDriver == "memory"
+                    ? "Every logged-in visitor's session will be lost — the in-memory session driver doesn't survive the handoff."
+                    : "This instance will be replaced by a freshly spawned one; reconnect to the admin console with the new token once it's done."
             ),
         ]
         if config.cwpJanitorEnabled {
@@ -225,18 +229,38 @@ final class LassoAdminDelegate: AdminConsoleDelegate {
             // more-dangerous manual-only path. It's a "run it now instead
             // of waiting for the next poll" convenience, not its own
             // distinct destructive action.
-            let janitorDescription = await janitorTracker.statusDescription(
-                fallback: "Force an immediate CWP session sweep instead of waiting for the next scheduled poll (every \(config.cwpJanitorPollIntervalSeconds)s). Runs in \(config.cwpJanitorDryRun ? "DRY-RUN" : "ARMED") mode, same as the automatic loop."
-            )
+            let snapshot = await janitorTracker.snapshot()
+            let lastResult: String? = snapshot.lastSweepAt.map { _ in
+                var line = "\(snapshot.considered) considered, \(snapshot.disconnected) disconnected"
+                if let error = snapshot.error { line += " — last error: \(error)" }
+                return line
+            }
             actions.append(AdminAction(
                 name: "cwp-janitor-run-now",
                 label: "Run CWP Janitor Now",
-                description: janitorDescription,
+                description: "Force an immediate CWP session sweep instead of waiting for the next scheduled poll (every \(config.cwpJanitorPollIntervalSeconds)s). Runs in \(config.cwpJanitorDryRun ? "DRY-RUN" : "ARMED") mode, same as the automatic loop.",
                 category: "maintenance",
-                isDestructive: false
+                isDestructive: false,
+                isRunning: await janitorTracker.isRunning,
+                lastResult: lastResult
             ))
         }
         return actions
+    }
+
+    // MARK: - Phase 12: job history + structured action reports
+
+    func currentJob() async -> AdminRunningJob? {
+        await crawlTracker.currentJob(name: "crawl-report")
+    }
+
+    func recentJobRuns() async -> [AdminJobRun] {
+        await crawlTracker.recentJobRuns(name: "crawl-report")
+    }
+
+    func actionReport(for name: String) async -> AdminActionReport? {
+        guard name == "crawl-report" else { return nil }
+        return await crawlTracker.actionReport(name: name)
     }
 
     func executeAction(_ name: String) async throws -> AdminActionResult {
@@ -291,7 +315,7 @@ final class LassoAdminDelegate: AdminConsoleDelegate {
             let finishedAt = DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .short)
             let abortNote = abortedByCircuitBreaker ? " ABORTED EARLY — circuit breaker tripped on repeated backend failures." : ""
             let summary = "Last run: \(results.count) page(s), \(cleanCount) clean, \(failingCount) failing, \(excludedCount) excluded (finished \(finishedAt)).\(abortNote)"
-            await crawlTracker.finish(summary: summary)
+            await crawlTracker.finish(summary: summary, results: results, excludedCount: excludedCount, abortedByCircuitBreaker: abortedByCircuitBreaker)
             await logCapture?.capture(
                 "[crawl-report] finished: \(results.count) page(s) crawled, \(cleanCount) clean, \(failingCount) failing, \(excludedCount) excluded\(abortedByCircuitBreaker ? " (ABORTED by circuit breaker)" : "")"
             )
@@ -339,7 +363,7 @@ final class LassoAdminDelegate: AdminConsoleDelegate {
         switch outcome {
         case .failed(let reason):
             await restartCoordinator.reset()
-            await logCapture?.capture("[admin] restart-server failed: \(reason)")
+            await logCapture?.capture("[admin] restart-server failed: \(reason)", isError: true)
             return .failed("\(reason) This instance was left running, unchanged.")
 
         case .healthy(let pid):
