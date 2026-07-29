@@ -209,12 +209,46 @@ struct Evaluator {
             return try unary(op, try await evaluate(value))
         case let .binary(left, op, right):
             if op == "&&" {
+                // Ch. "Operators" > "Logical Operators": "Logical 'and'
+                // inspects its first operand, and if it is 'true',
+                // produces its second operand. If the first operand is
+                // 'false', logical 'and' will produce the value
+                // 'false'." VALUE-PRESERVING, not a strict-boolean
+                // coercion -- `a && b` produces `b` itself (whatever
+                // type it is) when `a` is truthy, matching JavaScript's
+                // `&&` more than C's/Swift's. Previously always
+                // collapsed to `.boolean(...)` regardless, silently
+                // discarding non-boolean operand values -- found via
+                // real corpus (zeroloop/ds's ds.lasso):
+                // `#p->isa(::pair) && #p->first->isa(::string) &&
+                // #p->first->beginswith('-')` reads fine either way
+                // (every operand is already boolean-shaped there), but
+                // `:#rest || staticarray`'s sibling `||` case (handled
+                // just below) breaks real corpus outright.
                 let lhs = try await evaluate(left)
-                return lhs.isTruthy ? .boolean(try await evaluate(right).isTruthy) : .boolean(false)
+                return lhs.isTruthy ? try await evaluate(right) : .boolean(false)
             }
             if op == "||" {
+                // Ch. "Operators" > "Logical Operators": "Logical 'or'
+                // inspects its first operand, and if it is 'true',
+                // produces that first operand. If the first operand is
+                // 'false', logical 'or' will produce the second
+                // operand." Same VALUE-PRESERVING contract as `&&`
+                // above, in both directions this time (op1 on the
+                // truthy branch, op2 on the falsy branch -- neither
+                // coerced). Previously always collapsed to
+                // `.boolean(...)`, so real corpus's extremely common
+                // "fallback default" idiom (zeroloop/ds's ds.lasso:
+                // `.dsinfo->extend(:#rest || staticarray)`, used
+                // throughout `search`/`findrows`/`updaterows`/etc.) lost
+                // the ACTUAL array/pair value every time #rest was
+                // truthy, collapsing it to a bare `.boolean(true)` --
+                // the real reason `->search()`'s criteria never reached
+                // `dsinfo->extend` at all, discovered while chasing why
+                // a` WHERE`-clause fix upstream still wasn't taking
+                // effect.
                 let lhs = try await evaluate(left)
-                return lhs.isTruthy ? .boolean(true) : .boolean(try await evaluate(right).isTruthy)
+                return lhs.isTruthy ? lhs : try await evaluate(right)
             }
             if op == ">>" {
                 // Ch. 30 Table 22 (p.420-421): "The ->Contains member tag
