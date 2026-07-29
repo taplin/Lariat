@@ -82,6 +82,13 @@ One line per tag, most recent first — full details live in each tag's own GitH
 (`gh release view vX.Y.Z`), this is just a scannable index. Add an entry here as part of cutting
 each release, not after the fact.
 
+- **`v0.3.0`** (2026-07-29) — `&&`/`||` are now value-preserving matching real Lasso semantics
+  (previously always collapsed to boolean), fixing a real corpus bug where
+  `dsinfo->extend(:#rest || staticarray)` silently dropped search criteria. New language support:
+  colon-splat call arguments, type reopening (`define ExistingType->method`), a distinct `keyword`
+  value type, `delve()`, `dsinfo->inputcolumns` search-criteria translation, `->asstaticarray`.
+  Admin console Phase 6: real crawl-report wiring, job history, alert tags. Picks up Perfect-XML's
+  and Perfect-NIO's matching macOS libxml2/zlib pkg-config collision fixes. 1128/1128 tests pass.
 - **`v0.2.3`** (2026-07-27) — dependency-only patch, no Perfect-Lasso source changes. Pulls in
   Perfect-CRUD's ADR-0001 connection pooling (`DatabaseConnectionPool`) and async execution
   boundary, plus its `CRUDTableStructure()` visibility fix (was `internal`, broke every host
