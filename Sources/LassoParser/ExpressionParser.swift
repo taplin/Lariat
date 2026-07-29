@@ -1356,16 +1356,27 @@ struct ExpressionParser {
         // a bare colon-call has no parens of its own for this to open
         // inside of), and only at the very start (nothing parsed yet).
         // Real corpus (zeroloop/ds's ds.lasso): `.dsinfo->extend(:#rest ||
-        // staticarray)`. Reuses the exact same comma-list parsing as the
-        // sibling staticarray-LITERAL shape (`(: 1, 2, 3)`, handled in
-        // `parsePrimary`'s `.symbol("(") where peek == .symbol(":")` case)
-        // — the grammar is identical; only what `Evaluator.evaluate(_
-        // arguments:)` does with the `":"`-labeled result differs (splat
-        // vs. build-one-array-value).
+        // staticarray)`.
+        //
+        // Parses EXACTLY ONE expression, NOT the sibling staticarray-
+        // LITERAL shape's comma-list (`(: 1, 2, 3)`, handled separately
+        // in `parsePrimary`'s `.symbol("(") where peek == .symbol(":")`
+        // case) -- an EARLIER version of this fix reused that comma-list
+        // parser here too, wrapping its result in a NEW `array(...)`
+        // call. That's exactly wrong for the invocation grammar: `#lv(:
+        // #my_params)` means "evaluate `#my_params` (already an array)
+        // and splat ITS OWN elements," not "build a fresh one-element
+        // array containing `#my_params` and splat THAT" -- the extra
+        // wrap wasn't visible testing `dsinfo->extend` directly (only
+        // one splat deep), but surfaced immediately once `->search()`'s
+        // real THREE-deep re-splat chain (`findrows` -> `search` ->
+        // `dsinfo->extend`, each forwarding via `:#rest || staticarray`)
+        // nested the original array one layer deeper at every hop.
         if closing != nil, peek == .symbol(":") {
             index += 1
-            let elements = parseArguments(closing: closing)
-            return [LassoArgument(label: ":", value: .call(callee: .identifier("array"), arguments: elements))]
+            let expression = parseExpression()
+            if let closing { _ = consume(closing) }
+            return [LassoArgument(label: ":", value: expression)]
         }
         while peek != .eof {
             if let closing, consume(closing) { break }
