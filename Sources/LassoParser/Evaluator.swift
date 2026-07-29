@@ -2932,6 +2932,15 @@ struct Evaluator {
             )
         case let (.array(values), "size"): return .integer(values.count)
         case let (.array(values), "first"): return values.first ?? .null
+        case let (.array(values), "asstaticarray"):
+            // This codebase has no distinct StaticArray type -- `array`
+            // stands in for it everywhere else (established precedent,
+            // `Runtime.swift`'s `register("staticarray")`), so converting
+            // TO staticarray from an array that's already the same
+            // underlying representation is a plain identity. Real
+            // corpus (zeroloop/ds's ds.lasso): `#dsinfo->inputcolumns =
+            // #columns->asstaticarray`.
+            return .array(values)
         case let (.array(values), "insert"):
             // Real corpus: includes/detail_a_sku.lasso's
             // `$skuArrayItem->insert(field('scrubs_sku') = $temp_array)`
