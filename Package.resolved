@@ -1,31 +1,31 @@
 {
-  "originHash" : "cae4d1f8ac3312f74ed575a35972f6b949d163fc10ede45aed87dd12fe70c01c",
+  "originHash" : "0f11c6b383af9ae445f082653b1b58a23dc7281f5d9b1b48835037c161483881",
   "pins" : [
     {
       "identity" : "async-http-client",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swift-server/async-http-client.git",
       "state" : {
-        "revision" : "9544287b9416c0bc71e58b9f3aead8dd14b16103",
-        "version" : "1.36.0"
+        "revision" : "f95c908967e98c68c5ce3fd61a7974e7e869e303",
+        "version" : "1.36.1"
       }
     },
     {
       "identity" : "perfect-crud",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/taplin/Perfect-CRUD.git",
+      "location" : "https://github.com/PerfectlySoft/Perfect-CRUD.git",
       "state" : {
         "branch" : "main",
-        "revision" : "ed36835d9ce82d3ced51a77a6fbf4a532e3df1c2"
+        "revision" : "110ab8077951c5ab7841db42cb643698d5f2d9c9"
       }
     },
     {
       "identity" : "perfect-filemaker",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/taplin/Perfect-FileMaker.git",
+      "location" : "https://github.com/PerfectlySoft/Perfect-FileMaker.git",
       "state" : {
         "branch" : "main",
-        "revision" : "3eb4f68f28d760e79cfe5f4d1c4208c66dcdd3c4"
+        "revision" : "c8e9f918339ca5224db5295da623801827dbf703"
       }
     },
     {
@@ -40,73 +40,73 @@
     {
       "identity" : "perfect-mysql",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/taplin/Perfect-MySQL.git",
+      "location" : "https://github.com/PerfectlySoft/Perfect-MySQL.git",
       "state" : {
         "branch" : "main",
-        "revision" : "c626a8980a825048c9486f0403bfec645e284e38"
+        "revision" : "a85b6eb88fb2e5bc04d1ef87ef465cb1030dc6c8"
       }
     },
     {
       "identity" : "perfect-nio",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/taplin/Perfect-NIO.git",
+      "location" : "https://github.com/PerfectlySoft/Perfect-NIO.git",
       "state" : {
         "branch" : "main",
-        "revision" : "dce873a131304cc07008f2c06ff71630d1f82477"
+        "revision" : "441b87e36230ce322a32348e957bbfe03d505f23"
       }
     },
     {
       "identity" : "perfect-postgresql",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/taplin/Perfect-PostgreSQL.git",
+      "location" : "https://github.com/PerfectlySoft/Perfect-PostgreSQL.git",
       "state" : {
         "branch" : "main",
-        "revision" : "565a7e4477b41d72e26c2b17a7cc684d6a551236"
+        "revision" : "8811fb5c5fbbef155bfcb7f8da9d151da0978be1"
       }
     },
     {
       "identity" : "perfect-redis",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/taplin/Perfect-Redis.git",
+      "location" : "https://github.com/PerfectlySoft/Perfect-Redis.git",
       "state" : {
         "branch" : "main",
-        "revision" : "47b457601642a11daa09fee16df55e14ec60ac26"
+        "revision" : "c47ddd85e1ca705e0750ff9fc7b4c709795513aa"
       }
     },
     {
       "identity" : "perfect-session",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/taplin/Perfect-Session.git",
+      "location" : "https://github.com/PerfectlySoft/Perfect-Session.git",
       "state" : {
         "branch" : "main",
-        "revision" : "2018195554d3076f1dfbec407168396c7f11e6cd"
+        "revision" : "93b9e678317c546c068b3288999214710b6928f3"
       }
     },
     {
       "identity" : "perfect-smtp",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/taplin/Perfect-SMTP.git",
+      "location" : "https://github.com/PerfectlySoft/Perfect-SMTP.git",
       "state" : {
         "branch" : "main",
-        "revision" : "cb0493bee9c1626c550c2ea334e5da8d322e1c2c"
+        "revision" : "a33bc72a4d6886e0882d3c4085ff80803b4f1357"
       }
     },
     {
       "identity" : "perfect-sqlite",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/taplin/Perfect-SQLite.git",
+      "location" : "https://github.com/PerfectlySoft/Perfect-SQLite.git",
       "state" : {
         "branch" : "main",
-        "revision" : "7c325819427e73cf2a6c372208d4461bbc294606"
+        "revision" : "05dd9469edb9a448b328870ed22157405b577f51"
       }
     },
     {
       "identity" : "perfect-xml",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/taplin/Perfect-XML.git",
+      "location" : "https://github.com/PerfectlySoft/Perfect-XML.git",
       "state" : {
         "branch" : "main",
-        "revision" : "27f00b7130b8d746dccb4ec4f0e8acd940d670a2"
+        "revision" : "d00d0f097d21e1a999bed24b3d2788cc49de422b"
       }
     },
     {
@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-asn1.git",
       "state" : {
-        "revision" : "a9a5efd40eaf558a2bcd48d64b1d1646be686008",
-        "version" : "1.7.1"
+        "revision" : "d9a5b37470adc940d22c3bcd5ca6953a516b727f",
+        "version" : "1.7.2"
       }
     },
     {
@@ -159,8 +159,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-certificates.git",
       "state" : {
-        "revision" : "449dbbecd0f31e82b510ada227ca152caa8b5e98",
-        "version" : "1.19.4"
+        "revision" : "c8aece90ea05f9866bd392a5bf13b5cae56c0e03",
+        "version" : "1.20.0"
       }
     },
     {
@@ -213,8 +213,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-http-types.git",
       "state" : {
-        "revision" : "db774a277f60063a32d854f2980299caf06da041",
-        "version" : "1.6.0"
+        "revision" : "6c8ca8297332ea2780c45e1bce9d7fd2a8b51e1d",
+        "version" : "1.7.0"
       }
     },
     {
@@ -222,8 +222,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-log.git",
       "state" : {
-        "revision" : "a878e7f8f46cfc0e1125e565b5c08e7d5272dc9a",
-        "version" : "1.14.0"
+        "revision" : "3ffafb9722d5d918c614feb496c8789a3b59d222",
+        "version" : "1.15.0"
       }
     },
     {
@@ -240,8 +240,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "0b18836bd8b0162e7e17a995a3fbee20ed8f3b2b",
-        "version" : "2.101.3"
+        "revision" : "a931f2c1de8dd49381ce3bf2e279d033f68d8865",
+        "version" : "2.102.0"
       }
     },
     {
@@ -249,8 +249,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-extras.git",
       "state" : {
-        "revision" : "88a51340f59cf181ebde888bd1b749296b3ec029",
-        "version" : "1.34.3"
+        "revision" : "41449336c8ecfadac6b4b5be75f9c3c306e61ced",
+        "version" : "1.35.1"
       }
     },
     {
@@ -258,8 +258,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-http2.git",
       "state" : {
-        "revision" : "45bdf670248be5f16ec0340e125dca285536f0fb",
-        "version" : "1.45.0"
+        "revision" : "0f3e54e29c944c2e835ad52159da7d9e1c94ac69",
+        "version" : "1.46.0"
       }
     },
     {
@@ -267,8 +267,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-ssl.git",
       "state" : {
-        "revision" : "d930168b86f46ca51a4bc09c5ca45c1833db8067",
-        "version" : "2.37.2"
+        "revision" : "03827c1a9fdb2b6b00a4e93ede8861520263af8c",
+        "version" : "2.37.4"
       }
     },
     {
@@ -301,10 +301,10 @@
     {
       "identity" : "swift-service-lifecycle",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/swift-server/swift-service-lifecycle.git",
+      "location" : "https://github.com/swift-server/swift-service-lifecycle",
       "state" : {
-        "revision" : "9829955b385e5bb88128b73f1b8389e9b9c3191a",
-        "version" : "2.11.0"
+        "revision" : "7f9326b0326ff86e3646295ea6e891f68c471c5e",
+        "version" : "2.12.0"
       }
     },
     {
@@ -312,8 +312,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-system.git",
       "state" : {
-        "revision" : "50688cacbd41d547e9eb9f7a213542340b7c442b",
-        "version" : "1.7.5"
+        "revision" : "869129b7bf4ecc57b97d0193ad29690ca2134750",
+        "version" : "1.8.1"
       }
     }
   ],

@@ -10,7 +10,11 @@ equivalent Linux case where `pkg-config` is still genuinely required.
 
 The same collision applied to `zlib` (Perfect-NIO's `CZlib` target, also
 bundled directly by recent SDKs) and got the identical fix there — see
-[`Perfect-NIO` PR #2](https://github.com/taplin/Perfect-NIO/pull/2).
+[`Perfect-NIO` PR #2](https://github.com/taplin/Perfect-NIO/pull/2) (filed
+against the pre-merge `taplin` fork; both fixes now live on
+[`PerfectlySoft/Perfect-NIO`](https://github.com/PerfectlySoft/Perfect-NIO)
+and [`PerfectlySoft/Perfect-XML`](https://github.com/PerfectlySoft/Perfect-XML)
+main, which is what Perfect-Lasso's `Package.swift` points at).
 
 **Symptom**: `swift build`/`swift run` fails while building the `libxml2`
 system-library module (pulled in transitively via `Perfect-XML` →
@@ -65,7 +69,7 @@ Perfect-XML code issue.** Confirmed by:
 ### Structural fix (upstream, in Perfect-XML)
 
 `Perfect-XML`'s `libxml2` system-library target (`Sources/libxml2` in
-[`Perfect-XML`](https://github.com/taplin/Perfect-XML)) now omits
+[`Perfect-XML`](https://github.com/PerfectlySoft/Perfect-XML)) now omits
 `pkgConfig` entirely on macOS. Verified empirically: with a synthetic
 competing `libxml-2.0.pc` on `PKG_CONFIG_PATH`, the pre-fix manifest passed
 its `-I` path straight into the module compile (`swift build -v` shows
