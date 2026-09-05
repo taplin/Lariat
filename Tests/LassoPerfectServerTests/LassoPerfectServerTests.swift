@@ -752,7 +752,7 @@ private func sampleServerConfig(
 private func neverCompletingTask() -> Task<Void, Error> {
     Task<Void, Error> {
         while !Task.isCancelled {
-            try? await Task.sleep(for: .seconds(3600))
+            try? await Task.sleep(nanoseconds: 3600000000000)
         }
     }
 }

@@ -112,7 +112,7 @@ struct LassoEmailJobTrackerTests {
     @Test func ttlExpiryRemovesEntriesOlderThanTheGivenTTLButKeepsRecentOnes() async throws {
         let tracker = LassoEmailJobTracker()
         let stale = await tracker.recordQueued()
-        try await Task.sleep(for: .milliseconds(60))
+        try await Task.sleep(nanoseconds: 60000000)
         let fresh = await tracker.recordQueued()
 
         // A TTL shorter than the real sleep above but longer than the
@@ -127,7 +127,7 @@ struct LassoEmailJobTrackerTests {
     @Test func ttlExpiryIsMeasuredFromLastUpdatedNotFromCreation() async throws {
         let tracker = LassoEmailJobTracker()
         let id = await tracker.recordQueued()
-        try await Task.sleep(for: .milliseconds(60))
+        try await Task.sleep(nanoseconds: 60000000)
         // Touching the entry resets its own `lastUpdated` -- a sweep with a
         // TTL shorter than the elapsed time since CREATION, but longer than
         // the time since this update, must not expire it.
@@ -141,7 +141,7 @@ struct LassoEmailJobTrackerTests {
     @Test func sweepAppliesBothTTLAndHardCapTogether() async throws {
         let tracker = LassoEmailJobTracker()
         let stale = await tracker.recordQueued()
-        try await Task.sleep(for: .milliseconds(60))
+        try await Task.sleep(nanoseconds: 60000000)
         var recent: [String] = []
         for _ in 0..<4 {
             recent.append(await tracker.recordQueued())
