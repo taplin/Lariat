@@ -2699,7 +2699,7 @@ let siteServerTask = Task.detached {
             }
         }
 }
-print("Lasso Perfect test server")
+print("Lariat server")
 print("Site root: \(config.siteRoot.path)")
 if let startupPath = config.startupPath {
     let result = await loadLassoStartupDirectory(
