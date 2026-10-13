@@ -341,7 +341,7 @@ struct LassoEmailSMTPEndToEndTests {
         // parameter exists specifically so callers (this test included)
         // can override it.
         let evicted = await registry.sweepIdleConnections(idleTimeout: 0.05)
-        try? await Task.sleep(for: .milliseconds(100))
+        try? await Task.sleep(nanoseconds: 100000000)
         let evictedAfterWait = evicted > 0 ? evicted : await registry.sweepIdleConnections(idleTimeout: 0.05)
 
         try await server.channel.close()

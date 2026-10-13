@@ -21,13 +21,17 @@ let package = Package(
         .executable(name: "lariat-server", targets: ["LassoPerfectServer"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/taplin/Perfect-CRUD.git", branch: "main"),
-        .package(url: "https://github.com/taplin/Perfect-MySQL.git", branch: "main"),
-        .package(url: "https://github.com/taplin/Perfect-NIO.git", branch: "main"),
-        .package(url: "https://github.com/taplin/Perfect-Session.git", branch: "main"),
-        .package(url: "https://github.com/taplin/Perfect-FileMaker.git", branch: "main"),
+        // Our forks have been merged upstream into PerfectlySoft's own repos (Swift 6
+        // modernization PRs) -- point at those directly rather than the now-stale taplin
+        // forks. Perfect-Lasso itself and Perfect-FileMaker-AdminAPI have no PerfectlySoft
+        // upstream (both are original to this resurrection effort), so they stay on taplin.
+        .package(url: "https://github.com/PerfectlySoft/Perfect-CRUD.git", branch: "main"),
+        .package(url: "https://github.com/PerfectlySoft/Perfect-MySQL.git", branch: "main"),
+        .package(url: "https://github.com/PerfectlySoft/Perfect-NIO.git", branch: "main"),
+        .package(url: "https://github.com/PerfectlySoft/Perfect-Session.git", branch: "main"),
+        .package(url: "https://github.com/PerfectlySoft/Perfect-FileMaker.git", branch: "main"),
         .package(url: "https://github.com/taplin/Perfect-FileMaker-AdminAPI.git", branch: "main"),
-        .package(url: "https://github.com/taplin/Perfect-SMTP.git", branch: "main"),
+        .package(url: "https://github.com/PerfectlySoft/Perfect-SMTP.git", branch: "main"),
         .package(url: "https://github.com/apple/swift-crypto.git", from: "4.5.0"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
     ],

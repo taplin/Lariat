@@ -281,7 +281,7 @@ struct LassoPerfectSMTPEndToEndTests {
         for _ in 0..<20 {
             finalStatus = await tracker.status(of: jobID)
             if finalStatus == .sent { break }
-            try await Task.sleep(for: .milliseconds(20))
+            try await Task.sleep(nanoseconds: 20000000)
         }
         #expect(finalStatus == .sent)
         #expect(recorder.sendCount == 1)
@@ -303,7 +303,7 @@ struct LassoPerfectSMTPEndToEndTests {
         for _ in 0..<20 {
             finalStatus = await tracker.status(of: jobID)
             if case .error = finalStatus { break }
-            try await Task.sleep(for: .milliseconds(20))
+            try await Task.sleep(nanoseconds: 20000000)
         }
         guard case .error = finalStatus else {
             Issue.record("expected job \(jobID) to end in .error, got \(String(describing: finalStatus))")
@@ -331,7 +331,7 @@ struct LassoPerfectSMTPEndToEndTests {
         for _ in 0..<20 {
             finalStatus = await tracker.status(of: jobID)
             if finalStatus == .sent { break }
-            try await Task.sleep(for: .milliseconds(20))
+            try await Task.sleep(nanoseconds: 20000000)
         }
         #expect(finalStatus == .sent)
         #expect(recorder.sendCount == 1)
@@ -361,7 +361,7 @@ struct LassoPerfectSMTPEndToEndTests {
         for _ in 0..<100 {
             finalStatus = await tracker.status(of: jobID)
             if finalStatus == .sent { break }
-            try await Task.sleep(for: .milliseconds(50))
+            try await Task.sleep(nanoseconds: 50000000)
         }
         #expect(finalStatus == .sent)
         #expect(recorder.sendCount == 1)
@@ -502,7 +502,7 @@ struct LassoPerfectSMTPEndToEndTests {
         for _ in 0..<100 {
             finalStatus = await tracker.status(of: jobID)
             if finalStatus == .sent { break }
-            try await Task.sleep(for: .milliseconds(50))
+            try await Task.sleep(nanoseconds: 50000000)
         }
         #expect(finalStatus == .sent)
         #expect(recorder.sendCount == 1)
@@ -551,7 +551,7 @@ struct LassoPerfectSMTPEndToEndTests {
         for _ in 0..<20 {
             finalStatus = await tracker.status(of: jobID)
             if finalStatus == .sent { break }
-            try await Task.sleep(for: .milliseconds(20))
+            try await Task.sleep(nanoseconds: 20000000)
         }
         #expect(finalStatus == .sent)
         #expect(recorder.sendCount == 1)
@@ -1102,7 +1102,7 @@ struct LassoPerfectSMTPEndToEndTests {
         for _ in 0..<20 {
             finalStatus = await tracker.status(of: jobID)
             if finalStatus == .sent { break }
-            try await Task.sleep(for: .milliseconds(20))
+            try await Task.sleep(nanoseconds: 20000000)
         }
         #expect(finalStatus == .sent)
         // Both personalized clones actually sent, in one background batch
