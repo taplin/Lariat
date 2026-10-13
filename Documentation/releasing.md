@@ -82,6 +82,18 @@ One line per tag, most recent first — full details live in each tag's own GitH
 (`gh release view vX.Y.Z`), this is just a scannable index. Add an entry here as part of cutting
 each release, not after the fact.
 
+- **`v0.4.0`** (2026-10-13) — **the project is now Lariat.** Renamed `taplin/Perfect-Lasso` to
+  `taplin/Lariat` (GitHub redirects the old URL, so existing clones, links and the `v0.1.0`-`v0.3.0`
+  tags keep working), the SwiftPM package `name:` from the vestigial `LassoSubsetCrawler` to
+  `Lariat`, and the server executable `lasso-perfect-server` to `lariat-server`. The module names
+  (`LassoParser`, `LassoPerfectCRUD`, `LassoPerfectSession`, `LassoPerfectFileMaker`,
+  `LassoPerfectSMTP`) and internal types are deliberately unchanged — they name the language being
+  parsed and bridged, not the project. No API or behavior change: the only functional edits are the
+  admin console's default token filename (`lariat-server-admin.token`) and the startup banner.
+  1127/1127 tests pass on macOS. **Linux was not re-verified for this release** — no container
+  runtime was available on the release machine. Nothing platform-conditional was touched, so parity
+  is expected to hold, but it is unverified rather than confirmed; re-run the `perfect-ci` container
+  suite before relying on it.
 - **`v0.3.0`** (2026-07-29) — `&&`/`||` are now value-preserving matching real Lasso semantics
   (previously always collapsed to boolean), fixing a real corpus bug where
   `dsinfo->extend(:#rest || staticarray)` silently dropped search criteria. New language support:
