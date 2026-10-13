@@ -68,7 +68,7 @@ tags:**
 
 Verified via 8 new tests (76/76 total, no regressions) and a live
 real-corpus crawl (`LASSO_CRAWL_REPORT=1`, see
-`Documentation/lasso-perfect-server.md`): clean pages rose from 1,666 to
+`Documentation/lariat-server.md`): clean pages rose from 1,666 to
 1,690 of 1,989, and `unknownFunction("Output")` no longer appears anywhere
 in the failure report. Several pages that previously failed on the
 `Output` gap now progress further and stop at `inlineNotConfigured`

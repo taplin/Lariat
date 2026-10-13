@@ -88,7 +88,7 @@ public enum LassoFileMakerLassoError: Error, Equatable, Sendable {
 /// handler is built at the composition root
 /// (`Sources/LassoPerfectServer/main.swift`), exactly where
 /// `PerfectCRUDLassoExecutor`'s real `Database` wiring lives today. See
-/// `Documentation/lasso-perfect-server.md`'s FileMaker Datasource section
+/// `Documentation/lariat-server.md`'s FileMaker Datasource section
 /// for the full design rationale, including every deliberately deferred
 /// case (`-Duplicate`/`-Random`/`-Show`/`-RX`/portal reads — zero real
 /// corpus evidence).
@@ -410,7 +410,7 @@ public struct PerfectFileMakerLassoExecutor: LassoDynamicQueryExecutor {
         // richer. Prefixed with the configured base URL so it's an
         // immediately usable link. Unverified against the real v16
         // server's exact <data> shape until live-tested -- see
-        // Documentation/lasso-perfect-server.md.
+        // Documentation/lariat-server.md.
         case .container(let value): .string(value.hasPrefix("http") ? value : baseURL + value)
         }
     }

@@ -3932,7 +3932,7 @@ import PerfectSessionCore
 /// response), so no test in this file can construct a "successful" result
 /// on its own. Full read-path (row/field mapping) coverage instead comes
 /// from live-verifying against the real FileMaker Server once credentials
-/// are available -- see Documentation/lasso-perfect-server.md.
+/// are available -- see Documentation/lariat-server.md.
 private enum TestFileMakerProbeError: Error {
     case stopAfterCapture
 }

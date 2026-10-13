@@ -64,7 +64,7 @@ struct ServerConfig: Sendable {
     /// throws inlineNotConfigured). All aliases share one MySQL
     /// connection (mysqlHost/Port/User/Password below) — real corpus
     /// datasources are separate schemas on the same server, not separate
-    /// servers; see `Documentation/lasso-perfect-server.md`. Populated
+    /// servers; see `Documentation/lariat-server.md`. Populated
     /// either from `LASSO_DATASOURCE_CONFIG_PATH` (a JSON file, supports
     /// multiple aliases) or the legacy single-alias
     /// `LASSO_DATASOURCE_ALIAS`/`LASSO_MYSQL_DATABASE` env var pair.
@@ -118,7 +118,7 @@ struct ServerConfig: Sendable {
     /// plain GET), group results by first unsupported construct, print a
     /// report, and exit. Replaces the manual `curl`-in-a-loop sweep used
     /// throughout this project's development sessions. See
-    /// `Documentation/lasso-perfect-server.md`'s "Next Compatibility Work".
+    /// `Documentation/lariat-server.md`'s "Next Compatibility Work".
     let crawlReportMode: Bool
     /// Optional path to also write the full per-page JSON results to,
     /// for diffing between runs. `LASSO_CRAWL_REPORT_PATH`.
@@ -142,7 +142,7 @@ struct ServerConfig: Sendable {
     /// real FileMaker Server Web Publishing Engine instances by running a
     /// short, purely sequential crawl against them, for reasons not fully
     /// understood from outside the HTTP layer (see
-    /// `Documentation/lasso-perfect-server.md`'s FileMaker connectivity
+    /// `Documentation/lariat-server.md`'s FileMaker connectivity
     /// section) — pacing every request, not just FileMaker-touching ones
     /// (the crawler can't know in advance which pages hit a datasource),
     /// is cheap insurance. `0` disables pacing entirely.
@@ -212,7 +212,7 @@ struct ServerConfig: Sendable {
     /// resolved against the local filesystem — e.g.
     /// "product_images/koi/247.jpg" -> "https://api.iscrubs.com/
     /// product_images/koi/247.jpg". Both unset (the default) disables
-    /// this entirely. See Documentation/lasso-perfect-server.md.
+    /// this entirely. See Documentation/lariat-server.md.
     let imageProxyPrefix: String?
     let imageProxyTarget: String?
     /// `LASSO_TAG_FORM_COUNTERS=1` — Phase 3 of tag-form consolidation.
@@ -247,7 +247,7 @@ struct ServerConfig: Sendable {
     /// Web Publishing sessions (see `PerfectFileMakerAdminAPI`'s
     /// `CWPSessionJanitor`). Off by default: an automated, unattended,
     /// timer-triggered cleanup action is a deployment-level opt-in, not a
-    /// default. See `Documentation/lasso-perfect-server.md`'s FileMaker
+    /// default. See `Documentation/lariat-server.md`'s FileMaker
     /// connectivity section for why this exists — WPE (built on Apache
     /// Tomcat internally) can leave orphaned CWP sessions that don't clear
     /// via its own undocumented ~30-minute internal reaper, saturating
@@ -598,7 +598,7 @@ struct ServerConfig: Sendable {
             adminConsoleEnabled: Self.isTruthyEnv(env["LASSO_ADMIN_CONSOLE"]),
             adminConsolePort: env["LASSO_ADMIN_PORT"].flatMap(Int.init) ?? 8990,
             adminConsoleTokenPath: env["LASSO_ADMIN_TOKEN_PATH"]
-                ?? (NSTemporaryDirectory() + "lasso-perfect-server-admin.token"),
+                ?? (NSTemporaryDirectory() + "lariat-server-admin.token"),
             adminConsoleTokenRotate: Self.isTruthyEnv(env["LASSO_ADMIN_TOKEN_ROTATE"]),
             cwpJanitorEnabled: cwpJanitorEnabled,
             cwpJanitorDryRun: Self.isFalsyEnv(env["LASSO_CWP_JANITOR_DRY_RUN"]) == false,
@@ -654,7 +654,7 @@ struct ServerConfig: Sendable {
 /// alias shares one MySQL connection, and every FileMaker alias shares
 /// one FileMaker Server connection — real corpus datasources are separate
 /// schemas/files on the same server, not separate servers. See
-/// `Documentation/lasso-perfect-server.md`.
+/// `Documentation/lariat-server.md`.
 ///
 /// Current shape:
 /// ```json
@@ -745,7 +745,7 @@ struct MySQLConnectionFileConfig: Decodable {
     /// `MySQLSessionConnector.table`'s own default) when omitted — override
     /// this if `sessionDatabase` already has an unrelated "sessions" table
     /// (e.g. another application's own session/user table in the same
-    /// schema), since Perfect-Lasso's MySQL session driver otherwise throws
+    /// schema), since Lariat's MySQL session driver otherwise throws
     /// against the wrong columns on every read/write and silently falls
     /// back to creating a fresh session each time.
     var sessionTable: String?
@@ -2798,7 +2798,7 @@ if config.crawlReportMode {
 // doc comment for why this exists. All the actual selection/sweep logic
 // lives in `PerfectFileMakerAdminAPI` (`CWPSessionJanitor`/`CWPSessionSelector`)
 // — this is generic to any Admin API consumer, not Lasso-specific, so
-// `lasso-perfect-server` just supplies its own config values and logging
+// `lariat-server` just supplies its own config values and logging
 // sink and calls into the package. `cwpAdminAPIClient`/`cwpJanitorTask` stay
 // `nil` when disabled, so the admin delegate can cleanly no-op the manual
 // trigger action and skip restart cancellation.

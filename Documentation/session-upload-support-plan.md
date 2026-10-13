@@ -23,7 +23,7 @@ root-confined filesystem implementation (`LassoFileSystemUploadProcessor`).
 temporary upload files into the destination, and reports operational failures
 as `LassoRecoverableError` so existing `[protect]` handling can catch them.
 Focused tests cover moving, size/extension filtering, temp-name destination
-selection, overwrite denial, and root confinement. `lasso-perfect-server`
+selection, overwrite denial, and root confinement. `lariat-server`
 now injects a process-lifetime `LassoFileSystemUploadProcessor` rooted at
 `LASSO_SITE_ROOT`, so `-Destination` remains site-root-confined in live
 requests.
@@ -38,7 +38,7 @@ LassoPerfectSession/PerfectBackedLassoSessionProvider.swift`) does the real
 async create/resume (`prepare`, before render) and save/destroy (`finalize`,
 after render) work, exposing only synchronous, already-loaded state to the
 evaluator through the (redesigned) `LassoSessionProvider` protocol.
-`lasso-perfect-server`'s `render` is now `async` to host this; it wires the
+`lariat-server`'s `render` is now `async` to host this; it wires the
 bridge in only when a page's preflight scan actually finds a
 `session_start` call (`Sources/LassoPerfectServer/main.swift`).
 
@@ -387,7 +387,7 @@ Missing:
 
 ### Milestone 1: Uploads Via Perfect-NIO
 
-- Use `request.readContent()` in `lasso-perfect-server`.
+- Use `request.readContent()` in `lariat-server`.
 - Map URL form and multipart fields into `LassoRequestProvider.postPairs`.
 - Map multipart files into upload metadata.
 - Implement `web_request->fileUploads()`.

@@ -558,7 +558,7 @@ let secondRequestOutput = try await renderAgainstSharedRegistry(
 precondition(firstRequestOutput == "42", "Library-defined tag call failed: \(firstRequestOutput)")
 precondition(secondRequestOutput == "20", "Library-defined tag call failed on second request: \(secondRequestOutput)")
 // loadedLibraries dedup is per-LassoContext (per-request), not on the
-// shared tagRegistry — see Documentation/lasso-perfect-server.md's
+// shared tagRegistry — see Documentation/lariat-server.md's
 // "library() per-process caching" fix. Two independent contexts each
 // load the library once, even though they share the same tagRegistry.
 precondition(

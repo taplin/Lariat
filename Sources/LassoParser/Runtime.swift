@@ -1487,7 +1487,7 @@ public struct LassoNativeRegistry: Sendable {
         // record ID, never a named field in the result set itself. Real
         // corpus round-trips this directly into a later -KeyValue
         // argument (`-KeyValue=(KeyField_Value)`) for -Update/-Delete —
-        // see LassoDataRow.keyValue and Documentation/lasso-perfect-server.md.
+        // see LassoDataRow.keyValue and Documentation/lariat-server.md.
         register("keyfield_value") { _, context in
             context.currentRow?.keyValue ??
                 context.currentInlineFrame?.rows.first?.keyValue ??
@@ -2191,7 +2191,7 @@ public struct LassoContext: Sendable {
     /// then never touched again — no `defer` clears them, so they survive
     /// intact all the way to the top-level caller via `inout` write-back,
     /// which happens even when the function exits by throwing. See
-    /// `Documentation/lasso-perfect-server.md`'s error-page section.
+    /// `Documentation/lariat-server.md`'s error-page section.
     public var lastErrorLocation: SourceRange?
     public var lastErrorIncludeStack: [String]?
     /// Tag-open-form recognition counts accumulated across this request's

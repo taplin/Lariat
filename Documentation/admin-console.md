@@ -1,10 +1,10 @@
 # Admin Console
 
-A browser-based operations dashboard for `lasso-perfect-server`, built on
+A browser-based operations dashboard for `lariat-server`, built on
 `PerfectAdminConsole` (a general-purpose library in the sibling `Perfect-NIO`
 package) plus Lasso-specific glue in this repo. This is the stable reference
 doc for using it — for the implementation narrative and design rationale,
-see `lasso-perfect-server.md`'s "Admin Console — 2026-07-16" section, and
+see `lariat-server.md`'s "Admin Console — 2026-07-16" section, and
 for the underlying library's full protocol/API reference, see
 `Perfect-NIO/README.md`'s "Admin console" section.
 
@@ -21,7 +21,7 @@ A single page where you can, without SSH access or a restart:
 
 ## Quick start
 
-1. **Enable it** — set these when starting `lasso-perfect-server`:
+1. **Enable it** — set these when starting `lariat-server`:
 
    ```
    LASSO_ADMIN_CONSOLE=1
@@ -36,7 +36,7 @@ A single page where you can, without SSH access or a restart:
    bearer token to `LASSO_ADMIN_TOKEN_PATH` (`chmod 600`, owner-only):
 
    ```
-   [AdminConsole] http://127.0.0.1:8990 — token: /tmp/lasso-perfect-server-admin.token
+   [AdminConsole] http://127.0.0.1:8990 — token: /tmp/lariat-server-admin.token
    ```
 
    Read it with `cat` (or open the file) — never echo it to a shared
@@ -74,7 +74,7 @@ log card's footer). Every card described below updates on that same cycle.
 Each FileMaker alias can have more than one known **connection profile**:
 the shared `filemaker` config block (profile id `primary`) plus one profile
 per alias that has its own `host`/`port` override in the datasources config
-file (see `lasso-perfect-server.md`'s Configuration section for
+file (see `lariat-server.md`'s Configuration section for
 `filemakerHostOverrides`/per-alias `host`/`port` fields). The dashboard's
 Datasources card lists every known profile for an alias in the dropdown,
 with the currently-active one pre-selected; clicking **Switch** re-points
@@ -148,7 +148,7 @@ and force-disconnects stale/excess Custom Web Publishing (CWP) sessions.
 Off by default (`LASSO_CWP_JANITOR_ENABLED=1` to enable). All the actual
 selection/sweep logic lives in a separate, Lasso-independent package,
 `Perfect-FileMaker-AdminAPI` (`CWPSessionSelector`/`CWPSessionJanitor`/
-`CWPSessionJanitorTracker`) — `lasso-perfect-server` only supplies config
+`CWPSessionJanitorTracker`) — `lariat-server` only supplies config
 values and a logging sink. Status, config, and last-sweep summary show up
 in the dashboard's "CWP Session Janitor" section; a manual "Run CWP Janitor
 Now" action triggers an immediate sweep instead of waiting for the next

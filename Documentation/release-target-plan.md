@@ -1,4 +1,4 @@
-# `lasso-perfect-server` release: build-from-source + GitHub source-tarball releases — plan
+# `lariat-server` release: build-from-source + GitHub source-tarball releases — plan
 
 Date: 2026-07-21
 Status: Research complete, empirically verified, scope finalized with the user. Ready to implement.
@@ -15,7 +15,7 @@ Four decisions were made for that approach before the pivot: bundle `libmysqlcli
 
 ## 3. What's needed now, verified empirically (not assumed)
 
-**A truly clean clone builds standalone, with zero local-checkout assumptions — confirmed by actually doing it.** Cloned Perfect-Lasso into a scratch directory with no `.swiftpm` mirror config at all, checked out `main`, and ran `swift build -c release --product lasso-perfect-server`: succeeded purely by resolving every Perfect-Resurrection sibling from its `github.com/taplin/*` URL over the network — this is exactly the payoff of the earlier package-mirroring migration (`Package.swift`'s dependencies were switched from local sibling paths to public GitHub URLs specifically so a standalone clone would work; this is the first time that migration's actual purpose has been verified end-to-end rather than just built against the local mirror). Then ran the built binary with a scratch `LASSO_SITE_ROOT` and confirmed it serves a real HTTP request correctly. **Both of these — "does a bare clone build" and "does the built binary actually run and serve" — are the two claims a build-from-source README needs to make, and both are now proven, not asserted.**
+**A truly clean clone builds standalone, with zero local-checkout assumptions — confirmed by actually doing it.** Cloned Lariat into a scratch directory with no `.swiftpm` mirror config at all, checked out `main`, and ran `swift build -c release --product lariat-server`: succeeded purely by resolving every Perfect-Resurrection sibling from its `github.com/taplin/*` URL over the network — this is exactly the payoff of the earlier package-mirroring migration (`Package.swift`'s dependencies were switched from local sibling paths to public GitHub URLs specifically so a standalone clone would work; this is the first time that migration's actual purpose has been verified end-to-end rather than just built against the local mirror). Then ran the built binary with a scratch `LASSO_SITE_ROOT` and confirmed it serves a real HTTP request correctly. **Both of these — "does a bare clone build" and "does the built binary actually run and serve" — are the two claims a build-from-source README needs to make, and both are now proven, not asserted.**
 
 **Build prerequisites are smaller than initially assumed.** Checked what's actually required by inspecting the built binary's linked libraries (`otool -L`) and each dependency's own `pkg-config` resolution:
 - **`libxml2` and `zlib` need no Homebrew install at all.** `pkg-config --exists libxml-2.0`/`zlib` both succeed on a machine with neither formula installed via Homebrew (confirmed: `brew list libxml2 zlib` reports neither is installed here) — macOS's own SDK ships both headers and `pkg-config` metadata for these natively. The built binary's actual linked copies are macOS's own system dylibs (`/usr/lib/libxml2.2.dylib`, `/usr/lib/libz.1.dylib`), not Homebrew's.
@@ -35,9 +35,9 @@ For whoever revisits a pre-built-binary release later: a real `swift build -c re
 Sections, in order:
 1. **What this is** — one paragraph, matching this project's own consistently honest maturity framing found elsewhere in `Documentation/` (explicitly not claimed production-ready).
 2. **Requirements** — Xcode 27+ (Swift 6.2 tools-version minimum, confirmed working on Xcode 27/Swift 6.4), Homebrew, `brew install mysql-client` (the one real prerequisite — explicitly note libxml2/zlib need no separate install).
-3. **Build** — `git clone https://github.com/taplin/Perfect-Lasso.git`, `cd Perfect-Lasso`, `swift build -c release --product lasso-perfect-server`. Note the built binary's location (`swift build -c release --show-bin-path`).
+3. **Build** — `git clone https://github.com/taplin/Lariat.git`, `cd Lariat`, `swift build -c release --product lariat-server`. Note the built binary's location (`swift build -c release --show-bin-path`).
 4. **Run** — minimum viable invocation (`LASSO_SITE_ROOT=/path/to/your/site <binary>`), pointer to the fuller configuration reference.
-5. **Configuration** — a short summary + link to `Documentation/lasso-perfect-server.md`'s existing Configuration section (already comprehensive; adapt/excerpt rather than duplicate) covering `LASSO_SITE_ROOT`, `LASSO_SERVER_PORT`, the datasource config file (`LASSO_DATASOURCE_CONFIG_PATH`) for MySQL/FileMaker/SMTP, and a pointer to `Documentation/admin-console.md` for the optional admin console.
+5. **Configuration** — a short summary + link to `Documentation/lariat-server.md`'s existing Configuration section (already comprehensive; adapt/excerpt rather than duplicate) covering `LASSO_SITE_ROOT`, `LASSO_SERVER_PORT`, the datasource config file (`LASSO_DATASOURCE_CONFIG_PATH`) for MySQL/FileMaker/SMTP, and a pointer to `Documentation/admin-console.md` for the optional admin console.
 6. **Using a tagged release instead of `main`** — how to check out a specific `vX.Y.Z` tag (or download that tag's source tarball from the GitHub Releases page) if you don't want to track the bleeding edge.
 7. **One enforced, security-relevant startup requirement worth calling out explicitly**: SMTP DKIM key files are hard-rejected at startup (not a warning) if group/world-readable (`ServerConfigError.dkimKeyFilePermissionsTooPermissive`) — `chmod 600` is required, or the server refuses to boot, if DKIM is configured at all.
 
@@ -49,7 +49,7 @@ GitHub already auto-generates and attaches "Source code (zip)"/"Source code (tar
 
 **Full step-by-step runbook (pre-flight checks, the actual tag/release commands, post-release verification, and rollback): [`Documentation/releasing.md`](releasing.md).**
 
-**Resolved**: `Perfect-Lasso` is now pushed to GitHub — `taplin/Perfect-Lasso`, public, matching every sibling Perfect-Resurrection library. Verified end-to-end against the real live URL, not just asserted: a fresh `git clone https://github.com/taplin/Perfect-Lasso.git` in a scratch directory built (`swift build -c release --product lasso-perfect-server`) and ran (served a real request correctly) with no local shortcuts of any kind.
+**Resolved**: `Lariat` is now pushed to GitHub — `taplin/Lariat`, public, matching every sibling Perfect-Resurrection library. Verified end-to-end against the real live URL, not just asserted: a fresh `git clone https://github.com/taplin/Lariat.git` in a scratch directory built (`swift build -c release --product lariat-server`) and ran (served a real request correctly) with no local shortcuts of any kind.
 
 ### 5.3 Versioning
 

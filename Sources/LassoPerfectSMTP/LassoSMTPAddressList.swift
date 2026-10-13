@@ -8,7 +8,7 @@
 //  8.5/9 accepts a single comma-delimited string for each of these params
 //  (bare addresses, `Display Name <addr>`, and `"Quoted, Name" <addr>`, any
 //  mixture, comma-separated). Neither `Perfect-SMTP` nor the pre-existing
-//  Perfect-Lasso codebase has an equivalent splitter — confirmed absent by
+//  Lariat codebase has an equivalent splitter — confirmed absent by
 //  the integration plan's research pass — so this is written from scratch.
 //
 //  Deliberately pure string parsing: no I/O, no `LassoContext`/

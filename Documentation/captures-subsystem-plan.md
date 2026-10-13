@@ -1622,7 +1622,7 @@ re-audited the next time this project does a corpus-usage sweep.
 ## Files Referenced
 
 - `https://lassoguide.com/language/captures.html`, `/language/query-expressions.html`, `/language/operators.html`, `/language/control-flow.html`, `/language/methods.html`, `/language/types.html` (Lasso 9.3, fetched directly)
-- `/Users/timtaplin/Perfect-Lasso/References/Lasso/Lasso 8.5 Language Guide.pdf` (confirmed zero Captures coverage)
-- `/Users/timtaplin/Perfect-Lasso/Documentation/{lasso9-lassoguide-gap-analysis-plan,lasso85-gap-analysis-plan,collections-subsystem-plan}.md`
+- `/Users/timtaplin/Lariat/References/Lasso/Lasso 8.5 Language Guide.pdf` (confirmed zero Captures coverage)
+- `/Users/timtaplin/Lariat/Documentation/{lasso9-lassoguide-gap-analysis-plan,lasso85-gap-analysis-plan,collections-subsystem-plan}.md`
 - `/Users/timtaplin/Perfect-Lasso-captures/Sources/LassoParser/{Runtime,Evaluator,ExpressionParser,ScriptBodyParser,TypeBodyParser,Renderer,TagCatalog,TagRegistry,TagReference,Collections,Syntax,Providers}.swift`
 - `/Users/timtaplin/scrubsSite`, `/Users/timtaplin/Documents/scrubs9` (corpus grep, both file-by-file)

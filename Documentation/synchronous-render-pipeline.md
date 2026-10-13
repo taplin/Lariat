@@ -110,7 +110,7 @@ synchronous:
 
 ## What changed
 
-The FileMaker datasource work (`Documentation/lasso-perfect-server.md`'s
+The FileMaker datasource work (`Documentation/lariat-server.md`'s
 FileMaker Datasource section) introduced the first backend whose
 *native* API is `async`: the resurrected `Perfect-FileMaker` replaced
 its blocking `PerfectCURL`/libcurl transport with `URLSession`'s

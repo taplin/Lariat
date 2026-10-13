@@ -4,10 +4,10 @@
 
 **macOS 12.0 (Monterey), Apple Silicon + Intel.** This is the actual,
 enforced, `otool`-verified minimum across the full dependency graph behind
-`lasso-perfect-server` as of 2026-07-24: `Perfect-CRUD`, `Perfect-XML`,
+`lariat-server` as of 2026-07-24: `Perfect-CRUD`, `Perfect-XML`,
 `Perfect-MySQL`, `Perfect-PostgreSQL`, `Perfect-Redis`, `Perfect-SQLite`,
 `Perfect-FileMaker` / `-AdminAPI`, `Perfect-Session`, `Perfect-SMTP`,
-`Perfect-NIO`, and `Perfect-Lasso` itself all declare `platforms:
+`Perfect-NIO`, and `Lariat` itself all declare `platforms:
 [.macOS(.v12)]` on `main`, and all build/test/`otool`-verify clean there.
 Tiers 1 (13.0) and 2 (12.0) below, originally scoped as open questions, are
 both done — see each tier's own section for exactly what changed. Intel
@@ -127,7 +127,7 @@ of anything in this Swift code.
 **Two packages need changes** — this is wider than it first looked. The
 original pass through this investigation only checked the dependency graph
 (`Perfect-SMTP`) and found the floor there; a later pass swept
-`Perfect-Lasso`'s *own* source (`grep` for `Duration`/`ContinuousClock`/
+`Lariat`'s *own* source (`grep` for `Duration`/`ContinuousClock`/
 `Task.sleep(for:)`) and found the identical API family used **13 more times
 across 5 files**, previously undocumented:
 
@@ -315,7 +315,7 @@ dylib at
 
 Apple's back-deployment story is well-trodden for **app bundles** — embed
 the dylib in `Contents/Frameworks/`, which Xcode/`.app` structure already
-has a natural place for. `lasso-perfect-server` is a bare SwiftPM
+has a natural place for. `lariat-server` is a bare SwiftPM
 executable, not an app bundle, and Apple's release notes and official docs
 say nothing about that case at all. A community-established, [Apple-DTS-confirmed
 recipe exists](https://nonstrict.eu/blog/2023/using-async-await-in-a-commandline-tool-on-older-macos-versions/)

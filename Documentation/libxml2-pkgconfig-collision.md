@@ -46,7 +46,7 @@ libxml2 symbols (`__oldXMLWDcompatibility`, `__xmlDefaultSAXHandler`,
 `__xmlParserVersion`) are declared slightly differently between the two
 versions, producing the "conflicting types" errors above.
 
-**This is an environment/toolchain collision, not a Perfect-Lasso or
+**This is an environment/toolchain collision, not a Lariat or
 Perfect-XML code issue.** Confirmed by:
 
 - Diffing the exact `Perfect-XML` commit pinned by the `v0.2.1` release's
@@ -81,10 +81,10 @@ update` is enough — no version bump needed). No Homebrew uninstall, no
 
 ### Manual remedies (for pre-fix commits, or the Linux-equivalent case)
 
-Homebrew's `libxml2` is genuinely not needed to build Perfect-Lasso — the
+Homebrew's `libxml2` is genuinely not needed to build Lariat — the
 SDK's own bundled copy is sufficient. The safest fix removes the
 collision without disturbing anything else `PKG_CONFIG_PATH` is used for
-(notably `mysql-client`, which Perfect-Lasso's `Perfect-MySQL` dependency
+(notably `mysql-client`, which Lariat's `Perfect-MySQL` dependency
 **does** need resolved via `pkg-config` — do not blank out
 `PKG_CONFIG_PATH` entirely, that trades this failure for a `mysqlclient`
 resolution failure instead).
@@ -110,7 +110,7 @@ needs the Homebrew `libxml2`):
 # command only -- everything else already on the path (e.g. mysql-client's
 # entry) is preserved unchanged.
 PKG_CONFIG_PATH="$(echo "$PKG_CONFIG_PATH" | tr ':' '\n' | grep -v "$(brew --prefix libxml2)" | paste -sd: -)" \
-  swift build -c release --product lasso-perfect-server
+  swift build -c release --product lariat-server
 ```
 
 Repeat the same `PKG_CONFIG_PATH="..." ` prefix for `swift test`/`swift

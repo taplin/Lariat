@@ -240,7 +240,7 @@ normal page output. Response construction:
 Since zero real corpus pages exercise any of this, "live verify" means a
 throwaway set of pages placed directly in the real site root (see the
 `lasso-real-corpus-paths` project memory for the path), served by
-`lasso-perfect-server` over real HTTP, then removed. All results matched
+`lariat-server` over real HTTP, then removed. All results matched
 exactly:
 
 - **Include family** (`_item8_check.lasso`): `include` rendered the

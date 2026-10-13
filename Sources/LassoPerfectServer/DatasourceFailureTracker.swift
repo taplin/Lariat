@@ -14,7 +14,7 @@
 /// `run(...)`) an in-process signal into the same event, so its circuit
 /// breaker can react to real backend distress directly instead of only
 /// inferring it from per-page HTTP status codes, which — per
-/// `Documentation/lasso-perfect-server.md`'s "Crawl pacing and a circuit
+/// `Documentation/lariat-server.md`'s "Crawl pacing and a circuit
 /// breaker" section — cannot distinguish a backend failure from an
 /// ordinary, already-cataloged interpreter gap.
 ///

@@ -4,7 +4,7 @@ Date: 2026-07-09
 
 ## Purpose
 
-`lasso-perfect-server` is the first integration harness for serving existing
+`lariat-server` is the first integration harness for serving existing
 site files through the Swift Lasso parser/runtime and Perfect backend pieces.
 It is intentionally a developer server, not a compatibility claim for a full
 legacy site.
@@ -19,7 +19,7 @@ LASSO_MYSQL_HOST=localhost \
 LASSO_MYSQL_DATABASE=catalog_mysql \
 LASSO_MYSQL_USER=perfect \
 LASSO_MYSQL_PASSWORD='...' \
-swift run lasso-perfect-server
+swift run lariat-server
 ```
 
 Environment variables:
@@ -276,7 +276,7 @@ Environment variables:
     once, in filename order, sharing one `LassoTagRegistry` — a file that
     fails to parse or render is recorded (file name + error) rather than
     thrown, so one bad file doesn't block the rest of the folder. Wired into
-    `lasso-perfect-server` via `LASSO_STARTUP_PATH` (opt-in, no default),
+    `lariat-server` via `LASSO_STARTUP_PATH` (opt-in, no default),
     using the same `LASSO_RENDER_EXTENSIONS` extension set already governing
     page rendering — real deployments commonly register custom extensions
     for both, so one setting covering both is correct, not a shortcut.
@@ -520,7 +520,7 @@ The parser/runtime source and its smoke suite (`Sources/LassoParserSmoke`,
 content. Real-corpus verification of this kind is opt-in via
 `LASSO_SMOKE_REAL_PAGE_PATH`/`LASSO_SMOKE_REAL_SITE_ROOT` (template pages) and
 `LASSO_SMOKE_REAL_API_PAGE_PATH` (script-mode pages) on `LassoParserSmoke`, or
-by pointing `lasso-perfect-server` itself at a real `LASSO_SITE_ROOT` locally.
+by pointing `lariat-server` itself at a real `LASSO_SITE_ROOT` locally.
 
 ## Native-type resolved: `library()` was caching at the wrong scope
 
@@ -820,7 +820,7 @@ observable via `error_currentError` without needing `protect` at all, since
 `pushInlineFrame` already surfaces it unconditionally. `-Add` best-effort
 follows up with a SELECT-by-insert-id for the inserted row; `-Delete`
 returns an empty found set (both matching documented Lasso behavior).
-`lasso-perfect-server`'s MySQL executor wiring (`main.swift`) gained
+`lariat-server`'s MySQL executor wiring (`main.swift`) gained
 `LASSO_MYSQL_ALLOW_WRITES`/`LASSO_MYSQL_ALLOW_RAW_SQL` env toggles, both
 default off. Deferred, matching the plan's own stated allowances:
 `-StatementOnly`'s true non-execution semantic (parsed, not yet acted on —
@@ -1378,7 +1378,7 @@ enable it, the dashboard walkthrough, the API table, security model — see
 
 `PerfectAdminConsole` (a general-purpose, opt-in Perfect-NIO library
 target — bound exclusively to `127.0.0.1`, bearer-token auth, CSRF on
-mutating routes) is wired into `lasso-perfect-server` via
+mutating routes) is wired into `lariat-server` via
 `LassoAdminDelegate` (`Sources/LassoPerfectServer/AdminConsoleIntegration.swift`).
 Disabled by default; `LASSO_ADMIN_CONSOLE=1` starts it alongside the main
 server as a background `Task`, matching the existing crawl-report-mode
@@ -1812,7 +1812,7 @@ test crawl (server-side visibility this project cannot get from outside
 the HTTP layer) — see "Crawl pacing and a circuit breaker" below for the
 client-side mitigation, now implemented.
 
-Live-verified end-to-end through `lasso-perfect-server` while POST was
+Live-verified end-to-end through `lariat-server` while POST was
 confirmed working: a page that had failed all session rendered
 successfully; the login page (which had separately been failing on
 `Encrypt_HMAC requires -Token`, a symptom that turned out to be
@@ -1844,7 +1844,7 @@ not actually unlock zero-field inserts — that's a separate, real gap in
 
 `koi.scrubs.test` — one of this site's existing `/etc/hosts` entries,
 previously routed through nginx to the real Lasso Server FastCGI backend
-— was repurposed to browse the site through `lasso-perfect-server`
+— was repurposed to browse the site through `lariat-server`
 directly in a real browser, for exactly this kind of bug: reproducing
 interactive-only issues (session/cart state across multiple clicks) that
 a scripted crawl can't easily trigger.
@@ -1857,7 +1857,7 @@ a scripted crawl can't easily trigger.
   standard 443 because this nginx runs unprivileged (as the normal user,
   not root) and can't bind sub-1024 ports without `sudo`.
 - **TLS**: an `mkcert` certificate for `koi.scrubs.test`
-  (`.config/lasso-perfect-server/certs/`) — `mkcert -install` (which adds
+  (`.config/lariat-server/certs/`) — `mkcert -install` (which adds
   the local CA to the system/browser trust stores) needs to be run
   interactively once, since it prompts for a `sudo` password.
 - **Site root**: `/Users/timtaplin/scrubsSite` (the copy this project has
@@ -1865,9 +1865,9 @@ a scripted crawl can't easily trigger.
   is what `koi.scrubs.test` actually served before this change and has
   since diverged (its own git repo, an `api`/`api.lasso` addition not
   present in the other copy).
-- **`lasso-perfect-server`**: run standalone (not launchd-managed) on port
+- **`lariat-server`**: run standalone (not launchd-managed) on port
   8281 with `LASSO_ADMIN_CONSOLE=1`, logging to
-  `.config/lasso-perfect-server/logs/koi-browse.log` — nginx
+  `.config/lariat-server/logs/koi-browse.log` — nginx
   `proxy_pass`es everything for `koi.scrubs.test` straight through, no
   static-file layer duplicated in nginx.
 - **Known gap surfaced by this setup**: a `HEAD` request to a page that
@@ -1918,7 +1918,7 @@ live server). The circuit breaker's core predicate is exposed as
 immediately by the very first real test.** The original predicate
 counted `statusCode == 0` (a genuine request-level failure/timeout) *or*
 any `5xx`. That's broken for this specific system:
-`lasso-perfect-server`'s own render-error page (`main.swift`'s
+`lariat-server`'s own render-error page (`main.swift`'s
 `LassoSiteRenderError` handler) returns `.internalServerError` (500)
 uniformly for *every* kind of Lasso error — an ordinary, already-
 cataloged interpreter gap (`unknownFunction`, `unsupportedExpression`)

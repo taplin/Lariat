@@ -42,7 +42,7 @@ public final class LassoTagRegistry: @unchecked Sendable {
         // own doc comment) — registered here, not per-caller, so it's
         // present in every `LassoTagRegistry` ever constructed
         // (per-request default instances AND the single shared instance
-        // `lasso-perfect-server` hands to every request, per this
+        // `lariat-server` hands to every request, per this
         // class's own doc comment above), matching a genuine Lasso 9
         // built-in's always-available semantics.
         types["dsinfo"] = LassoDsInfoType.makeDefinition()

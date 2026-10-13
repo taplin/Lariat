@@ -64,7 +64,7 @@ public struct CrawlDiffSummary: Sendable, Equatable {
 /// Requests every discovered site page over real HTTP and groups results by
 /// first unsupported construct — replaces the manual `curl`-in-a-loop sweep
 /// used throughout this project's development sessions with a repeatable,
-/// built-in tool. See `Documentation/lasso-perfect-server.md`'s "Next
+/// built-in tool. See `Documentation/lariat-server.md`'s "Next
 /// Compatibility Work" and `Documentation/crawl-report-filtering-plan.md`.
 public enum CrawlReport {
     /// Marker list ported verbatim from `LassoSubsetCrawler.Scanner.isLassoSource`
@@ -113,7 +113,7 @@ public enum CrawlReport {
     /// exist because this project has, on its own account, broken multiple
     /// real FileMaker Server Web Publishing Engine instances by running a
     /// short, purely sequential crawl against them — see
-    /// `Documentation/lasso-perfect-server.md`'s FileMaker connectivity
+    /// `Documentation/lariat-server.md`'s FileMaker connectivity
     /// section. The actual server-side exhaustion mechanism was never
     /// pinned down from outside the HTTP layer (two separate live-tested
     /// theories — GET vs. POST, and a session cookie — both turned out to
@@ -266,7 +266,7 @@ public enum CrawlReport {
     /// crawler couldn't get any response at all).
     ///
     /// Deliberately does *not* treat any `5xx` as distress, even though an
-    /// earlier version of this function did — `lasso-perfect-server`'s own
+    /// earlier version of this function did — `lariat-server`'s own
     /// render-error page (`main.swift`, the `LassoSiteRenderError` handler)
     /// returns `.internalServerError` (500) for *every* Lasso render
     /// error uniformly, regardless of cause: an ordinary, already-cataloged

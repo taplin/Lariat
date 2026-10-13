@@ -147,7 +147,7 @@ follows) falls back to treating it as ordinary code — same recovery
 behavior as before — but now also records a diagnostic
 (`ScriptBodyParser.diagnostics`, e.g. "Malformed 'define': expected a tag
 name") instead of failing silently. `ScriptBodyParser` collects diagnostics
-generally now; see `Documentation/lasso-perfect-server.md` for the rest
+generally now; see `Documentation/lariat-server.md` for the rest
 (unterminated brace bodies, stray closing braces, and the general
 arrow-brace block-closing mechanism this diagnostics work accompanied).
 

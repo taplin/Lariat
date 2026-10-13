@@ -42,7 +42,7 @@ Implemented:
 - **Path excludes** — `LASSO_CRAWL_EXCLUDE_PATHS` (comma-separated,
   case-insensitive substrings, e.g. `vendor`). Default empty. Has a
   live-serving sibling, `LASSO_RENDER_EXCLUDE_PATHS` (2026-07-17,
-  `lasso-perfect-server.md`'s Configuration section) — same matching
+  `lariat-server.md`'s Configuration section) — same matching
   logic (`CrawlReport.pathMatchesExclude`), separate list, since a real
   direct request to a vendor-noise path (not just a crawl sweep) can hit
   the same misparse.
@@ -152,7 +152,7 @@ path-list/exclude change between runs, not a render-outcome change.
 - `Package.swift` — new `LassoCrawlReport` library target,
   `LassoCrawlReportTests` test target.
 - `Tests/LassoCrawlReportTests/CrawlReportTests.swift` — new.
-- `Documentation/lasso-perfect-server.md` / `compatibility-matrix.md` /
+- `Documentation/lariat-server.md` / `compatibility-matrix.md` /
   `outstanding-compatibility-project-plans.md` — narrative updates.
 
 ## Known limitation — discovery is a file walk, not a link crawl (2026-07-16, not yet fixed)

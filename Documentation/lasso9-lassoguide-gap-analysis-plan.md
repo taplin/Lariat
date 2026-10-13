@@ -274,11 +274,11 @@ Ranked by (documented pervasiveness × likelihood of silent/undetectable failure
 
 ## Files referenced
 
-- `/Users/timtaplin/Perfect-Lasso/Sources/LassoParser/Evaluator.swift` (member dispatch, ~line 435-637; binary operators, ~line 365-412)
-- `/Users/timtaplin/Perfect-Lasso/Sources/LassoParser/Runtime.swift` (free-function native registry, `registerDefaultFunctions()` ~line 117-723)
-- `/Users/timtaplin/Perfect-Lasso/Sources/LassoParser/NativeTypes.swift` (`web_request`/`web_response`/`date`/`bytes` native-type method tables)
-- `/Users/timtaplin/Perfect-Lasso/Sources/LassoParser/TypeSystem.swift` (`LassoObjectInstance`, `LassoMethodDispatcher`)
-- `/Users/timtaplin/Perfect-Lasso/Sources/LassoParser/TagCatalog.swift` / `Renderer.swift` (block-level control flow: `if`/`loop`/`while`/`iterate`/`with`/`protect`)
-- `/Users/timtaplin/Perfect-Lasso/Sources/LassoParser/ExpressionParser.swift` (operator tokenization, `~line 50, 420`)
-- `/Users/timtaplin/Perfect-Lasso/Sources/LassoParser/Validation.swift`, `Hashing.swift`, `Encoding.swift`, `DateFormatting.swift`, `NumberFormatting.swift`, `BytesType.swift` (supporting implementations referenced throughout)
-- `/Users/timtaplin/Perfect-Lasso/Documentation/compatibility-matrix.md`, `outstanding-compatibility-project-plans.md`, `legacy-define-tag-type-plan.md`, `library-and-custom-tags.md`, `lasso-type-object-support.md` (existing tracked-gap docs, consulted first to avoid duplication)
+- `/Users/timtaplin/Lariat/Sources/LassoParser/Evaluator.swift` (member dispatch, ~line 435-637; binary operators, ~line 365-412)
+- `/Users/timtaplin/Lariat/Sources/LassoParser/Runtime.swift` (free-function native registry, `registerDefaultFunctions()` ~line 117-723)
+- `/Users/timtaplin/Lariat/Sources/LassoParser/NativeTypes.swift` (`web_request`/`web_response`/`date`/`bytes` native-type method tables)
+- `/Users/timtaplin/Lariat/Sources/LassoParser/TypeSystem.swift` (`LassoObjectInstance`, `LassoMethodDispatcher`)
+- `/Users/timtaplin/Lariat/Sources/LassoParser/TagCatalog.swift` / `Renderer.swift` (block-level control flow: `if`/`loop`/`while`/`iterate`/`with`/`protect`)
+- `/Users/timtaplin/Lariat/Sources/LassoParser/ExpressionParser.swift` (operator tokenization, `~line 50, 420`)
+- `/Users/timtaplin/Lariat/Sources/LassoParser/Validation.swift`, `Hashing.swift`, `Encoding.swift`, `DateFormatting.swift`, `NumberFormatting.swift`, `BytesType.swift` (supporting implementations referenced throughout)
+- `/Users/timtaplin/Lariat/Documentation/compatibility-matrix.md`, `outstanding-compatibility-project-plans.md`, `legacy-define-tag-type-plan.md`, `library-and-custom-tags.md`, `lasso-type-object-support.md` (existing tracked-gap docs, consulted first to avoid duplication)

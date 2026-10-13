@@ -5,7 +5,7 @@ public struct LassoDataRow: Equatable, Sendable {
     /// The row's key/record-id value, for real Lasso's `KeyField_Value`
     /// builtin. Real FileMaker rows always have one (the internal record
     /// ID, never a named field `field()`/`column()` could already read —
-    /// see `Documentation/lasso-perfect-server.md`'s FileMaker datasource
+    /// see `Documentation/lariat-server.md`'s FileMaker datasource
     /// section); MySQL rows have no equivalent concept wired up yet
     /// (`nil`, since no corpus evidence any MySQL page relies on it).
     public let keyValue: LassoValue?
@@ -1152,7 +1152,7 @@ public protocol LassoInlineProvider: Sendable {
 /// `LassoParser` itself and must never import a specific resurrected
 /// library (`LassoParser`'s `Package.swift` depends on `Crypto` only).
 /// This protocol lets a host application (e.g.
-/// `LassoPerfectSMTP`/`lasso-perfect-server`'s `main.swift`) wire a real
+/// `LassoPerfectSMTP`/`lariat-server`'s `main.swift`) wire a real
 /// conformer into `LassoContext.emailProvider` from the outside, exactly
 /// the same shape as `LassoInlineProvider`/`inlineProvider` above and
 /// `LassoSessionProvider`/`sessionProvider` — `LassoParser` dispatches

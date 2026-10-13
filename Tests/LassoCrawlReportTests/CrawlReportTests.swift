@@ -313,7 +313,7 @@ private func writeBaseline(_ records: [[String: String]]) throws -> URL {
 
 @Test func isBackendDistressSignalDoesNotTreatAnyHTTPStatusAsDistress() {
     // Not just 4xx (an unsupported construct on one page, the normal,
-    // expected output of a crawl) — also 5xx. lasso-perfect-server's own
+    // expected output of a crawl) — also 5xx. lariat-server's own
     // render-error page returns 500 uniformly for *every* kind of Lasso
     // error, ordinary already-cataloged interpreter gaps included, so a
     // 500 here is completely indistinguishable from a real backend

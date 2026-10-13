@@ -68,4 +68,4 @@ that:
 - `Documentation/inline-write-raw-sql-plan.md`
 - `Documentation/error-protect-model-plan.md`
 - `Documentation/compatibility-matrix.md`
-- `Documentation/lasso-perfect-server.md`
+- `Documentation/lariat-server.md`

@@ -134,7 +134,7 @@ specific legacy definition forms, not broad parser/runtime ambiguity.
 The working tree is currently dirty with additional uncommitted progress in:
 
 - `Documentation/compatibility-matrix.md`
-- `Documentation/lasso-perfect-server.md`
+- `Documentation/lariat-server.md`
 - `Sources/LassoParser/LassoParser.swift`
 - `Sources/LassoParser/Providers.swift`
 - `Sources/LassoParser/Runtime.swift`
@@ -540,5 +540,5 @@ Defer unless immediately encountered:
 10. Run `swift build --target LassoParser`, `swift run LassoParserSmoke`, and
    `swift test`.
 11. Run startup-loader smoke against the real `LassoStartup` directory.
-12. Update `compatibility-matrix.md`, `lasso-perfect-server.md`, and Sulu.
+12. Update `compatibility-matrix.md`, `lariat-server.md`, and Sulu.
 13. Commit as one coherent compatibility pass if tests and startup smoke pass.

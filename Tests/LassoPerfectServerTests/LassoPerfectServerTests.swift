@@ -136,7 +136,7 @@ private func sampleRequestInfo() -> HTTPRequestInfo {
 
 // MARK: - DatasourceFileConfig / DatasourceEntry decoding
 //
-// See Documentation/lasso-perfect-server.md's FileMaker Datasource
+// See Documentation/lariat-server.md's FileMaker Datasource
 // section. `datasources` used to be a flat `[String: String]` (Lasso
 // alias -> MySQL schema name); it's now `[String: DatasourceEntry]` so a
 // config file can mix MySQL and FileMaker aliases, but every config file
@@ -649,7 +649,7 @@ private struct RecordingExecutor: LassoDynamicQueryExecutor {
 
 // MARK: - LassoAdminDelegate
 
-// See Documentation/lasso-perfect-server.md's Admin Console section.
+// See Documentation/lariat-server.md's Admin Console section.
 // `testDatasource`'s live-connectivity paths (real MySQL/FileMaker
 // network calls) aren't exercised here -- covered by the manual smoke
 // check against a real server instead; these tests cover the delegate's

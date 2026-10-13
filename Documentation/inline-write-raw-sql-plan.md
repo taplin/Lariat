@@ -61,7 +61,7 @@ Live connector failures now have an explicit recoverable boundary:
 missing tables in the inline request, missing handlers, unsupported actions,
 and other fatal configuration/programmer failures remain visible.
 
-`lasso-perfect-server` wraps failures thrown by the actual PerfectCRUD MySQL
+`lariat-server` wraps failures thrown by the actual PerfectCRUD MySQL
 operation calls (`select`, `mutate`, and `execute`) in
 `LassoDatabaseActionError` after datasource-configuration guards pass. This
 keeps the policy line crisp: validation/configuration failures are fatal to

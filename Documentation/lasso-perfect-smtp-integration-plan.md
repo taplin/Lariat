@@ -1,19 +1,19 @@
 # LassoPerfectSMTP — Integration Plan
 
 Date: 2026-07-19
-Status: **Implemented — all six phases (A-F) shipped, merged to `main`, and released as part of [v0.2.1](https://github.com/taplin/Perfect-Lasso/releases/tag/v0.2.1).** This document remains the design record of how it got there; phase-by-phase framing below (including "not yet implemented" language) describes the planning process at the time, not current status. See `Sources/LassoPerfectSMTP/` for the shipped implementation.
+Status: **Implemented — all six phases (A-F) shipped, merged to `main`, and released as part of [v0.2.1](https://github.com/taplin/Lariat/releases/tag/v0.2.1).** This document remains the design record of how it got there; phase-by-phase framing below (including "not yet implemented" language) describes the planning process at the time, not current status. See `Sources/LassoPerfectSMTP/` for the shipped implementation.
 
 ## 1. Why this exists, and what it is not
 
-Perfect-SMTP (`/Users/timtaplin/Perfect-Resurrection/Perfect-SMTP`) is a complete, from-scratch Swift 6.2/SwiftNIO SMTP client — implemented across six phases, each independently milestone-reviewed (architecture, concurrency, protocol, security), fully merged to `main`. It was explicitly built to have **zero knowledge of Lasso**: no Lasso-shaped types, no dash-param API, no target inside its own repo for a Lasso adapter. Its own plan document (§4.1, §6) reserved that work for a future, separate task living entirely inside the Perfect-Lasso repository — the same pattern already established by `LassoPerfectFileMaker` and `LassoPerfectCRUD`, which wrap `Perfect-FileMaker`/`Perfect-CRUD` from the outside, as plain consumers of those libraries' public APIs, with zero Lasso-awareness leaking back into the wrapped library.
+Perfect-SMTP (`/Users/timtaplin/Perfect-Resurrection/Perfect-SMTP`) is a complete, from-scratch Swift 6.2/SwiftNIO SMTP client — implemented across six phases, each independently milestone-reviewed (architecture, concurrency, protocol, security), fully merged to `main`. It was explicitly built to have **zero knowledge of Lasso**: no Lasso-shaped types, no dash-param API, no target inside its own repo for a Lasso adapter. Its own plan document (§4.1, §6) reserved that work for a future, separate task living entirely inside the Lariat repository — the same pattern already established by `LassoPerfectFileMaker` and `LassoPerfectCRUD`, which wrap `Perfect-FileMaker`/`Perfect-CRUD` from the outside, as plain consumers of those libraries' public APIs, with zero Lasso-awareness leaking back into the wrapped library.
 
-This document is that future task. It plans a new `LassoPerfectSMTP` target inside Perfect-Lasso that gives `lasso-perfect-server` real, working `email_send`/`email_smtp`/`email_compose`/`email_mxlookup`/`email_result`/`email_status` support, replacing the current no-op stub.
+This document is that future task. It plans a new `LassoPerfectSMTP` target inside Lariat that gives `lariat-server` real, working `email_send`/`email_smtp`/`email_compose`/`email_mxlookup`/`email_result`/`email_status` support, replacing the current no-op stub.
 
 **Scope boundary, restated because it matters:** nothing in this plan modifies Perfect-SMTP's *public API surface as a Lasso-shaped thing* — Perfect-SMTP gains no Lasso types, no dash-param handling, no knowledge Lasso exists. It does, however, turn out that this plan's own dispatch-registration problem (§4.0) requires new, generic, Lasso-agnostic protocol surface inside `LassoParser` itself (not Perfect-SMTP) — that is a correction from this plan's first draft, found during review, not a violation of the "zero Lasso knowledge" boundary, which only ever applied to Perfect-SMTP.
 
 ## 2. Current state, verified directly against both codebases
 
-**Perfect-Lasso's existing adapter precedent.** `LassoPerfectFileMaker`, `LassoPerfectCRUD`, and `LassoPerfectSession` are all single-file SPM library targets under `Sources/`, each depending on exactly `LassoParser` plus the one resurrected library product they wrap (`Package.swift:32-59`). The FileMaker/CRUD adapters implement `LassoDynamicQueryExecutor` — **corrected during review: this is a one-method protocol** (`Providers.swift:993-995`: `func execute(_ request: LassoInlineRequest) async throws -> LassoInlineFrame`), not two as this plan's first draft claimed — that plugs into the **hardcoded** `"inline"` case in `RendererEngine.render` (`Renderer.swift:252-263`) via a `(any LassoInlineProvider)?` slot on `LassoContext` (`Runtime.swift:1079`). `LassoInlineProvider` is likewise one method (`executeInline`, `Providers.swift:989-991`). Neither adapter "registers a new tag" — they both reuse the one existing `[inline]` slot, populated per-request from `main.swift`. `LassoPerfectSession` follows the identical shape via its own `sessionProvider` slot.
+**Lariat's existing adapter precedent.** `LassoPerfectFileMaker`, `LassoPerfectCRUD`, and `LassoPerfectSession` are all single-file SPM library targets under `Sources/`, each depending on exactly `LassoParser` plus the one resurrected library product they wrap (`Package.swift:32-59`). The FileMaker/CRUD adapters implement `LassoDynamicQueryExecutor` — **corrected during review: this is a one-method protocol** (`Providers.swift:993-995`: `func execute(_ request: LassoInlineRequest) async throws -> LassoInlineFrame`), not two as this plan's first draft claimed — that plugs into the **hardcoded** `"inline"` case in `RendererEngine.render` (`Renderer.swift:252-263`) via a `(any LassoInlineProvider)?` slot on `LassoContext` (`Runtime.swift:1079`). `LassoInlineProvider` is likewise one method (`executeInline`, `Providers.swift:989-991`). Neither adapter "registers a new tag" — they both reuse the one existing `[inline]` slot, populated per-request from `main.swift`. `LassoPerfectSession` follows the identical shape via its own `sessionProvider` slot.
 
 **This "reuse an existing context slot" pattern is the ENTIRE precedent this codebase has for wiring an outside target into the interpreter — and it does not cover what this plan needs.** See §4.0.
 
@@ -80,7 +80,7 @@ This is real, reviewable design work in `LassoParser` itself, not just new files
 ### 4.1 Package/target layout
 
 ```
-Perfect-Lasso/
+Lariat/
   Sources/LassoParser/
     (new: LassoEmailProvider protocol + emailProvider context slot, §4.0 problem 1;
      new native-type dispatch slot for email_smtp, §4.0 problem 3 -- scoped separately)
@@ -193,7 +193,7 @@ plus `LASSO_SMTP_*` env-var fallbacks for the single-relay smoke-test path, matc
 
 Perfect-SMTP's own plan deliberately never built an `enqueue`/`status(of:)` API. `LassoEmailJobTracker` (actor) needs a job-ID scheme (Foundation `UUID()` — CSPRNG-backed, 122 bits of entropy; explicitly *not* a sequential/incrementing scheme, stated here so a future "optimization" doesn't quietly weaken it), an in-memory `[JobID: JobState]` store (in-memory-only, matching `DirectMXRetryQueue`'s/`MTASTSPolicyManager`'s identical documented scope boundary in Perfect-SMTP), and a bridge from `-immediate=false`/`-date`-scheduled sends into background `Task`s recording `DeliveryResult`s against the job ID.
 
-**Single-tenant confirmation, new from security review.** `lasso-perfect-server` runs one `LassoSiteServer` per process (confirmed, `main.swift:1798`, the only construction site). There is no cross-tenant isolation boundary for this job store to violate today — stated explicitly here so it's a tracked assumption, not a silently-reopened gap if this codebase ever grows a multi-site-per-process mode.
+**Single-tenant confirmation, new from security review.** `lariat-server` runs one `LassoSiteServer` per process (confirmed, `main.swift:1798`, the only construction site). There is no cross-tenant isolation boundary for this job store to violate today — stated explicitly here so it's a tracked assumption, not a silently-reopened gap if this codebase ever grows a multi-site-per-process mode.
 
 **Explicit unanswered questions for Phase E's implementation, new from concurrency review, given `DirectMXRetryQueue`'s own history of a real background-task-leak bug (a nudge-triggered restart that cancelled a sleep but never actually stopped the superseded task's own loop) caught during its milestone review:**
 - What happens to a job's background `Task` if nobody ever polls its status again — does it still run to completion and sit in the store (bounded only if there's an eviction/TTL policy, which this sketch doesn't yet have), or is there a cancellation path?
@@ -282,7 +282,7 @@ Four independent, separable pieces (§6's Phase F bullet). None require any new 
   "dkim": {
     "domain": "example.com",
     "selector": "s1",
-    "keyPath": "/etc/lasso-perfect-server/dkim/s1.private.pem",
+    "keyPath": "/etc/lariat-server/dkim/s1.private.pem",
     "keyType": "rsa"
   }
 }

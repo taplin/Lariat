@@ -47,7 +47,7 @@ Two details matter for any async plan:
   (`mysql_stmt_prepare` / `mysql_stmt_execute` / `mysql_stmt_fetch`,
   `MySQLStmt.swift`), never the text-protocol `mysql_real_query` path.
 - **What actually links:** verified empirically —
-  `otool -L ".build/out/Products/Debug/lasso-perfect-server"` →
+  `otool -L ".build/out/Products/Debug/lariat-server"` →
   `/opt/homebrew/opt/mysql-client/lib/libmysqlclient.24.dylib`.
   That is **Oracle MySQL client 9.6.0** (Homebrew `mysql-client 9.6.0`;
   `LIBMYSQL_VERSION "9.6.0"` in
@@ -181,7 +181,7 @@ Ranked disposition of the three possible paths:
 ### Verification commands used
 
 ```
-otool -L ".build/out/Products/Debug/lasso-perfect-server" | grep -i mysql
+otool -L ".build/out/Products/Debug/lariat-server" | grep -i mysql
   → /opt/homebrew/opt/mysql-client/lib/libmysqlclient.24.dylib
 brew list --versions mysql-client mariadb-connector-c
   → mysql-client 9.6.0, mariadb-connector-c 3.4.9

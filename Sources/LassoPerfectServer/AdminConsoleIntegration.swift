@@ -10,7 +10,7 @@ import PerfectMySQL
 /// `AdminConsoleDelegate` conformer supplying this server's Lasso-specific
 /// state to `PerfectAdminConsole` (status sections, datasource list,
 /// on-demand connectivity tests, live datasource switching, and a
-/// crawl-report action). See `Documentation/lasso-perfect-server.md`'s
+/// crawl-report action). See `Documentation/lariat-server.md`'s
 /// Admin Console section for the operator-facing setup (`LASSO_ADMIN_*`
 /// env vars).
 ///

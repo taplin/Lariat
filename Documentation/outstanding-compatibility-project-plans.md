@@ -3,7 +3,7 @@
 Last reviewed: July 12, 2026
 
 This document expands the next nine compatibility tasks from
-`Documentation/lasso-perfect-server.md` into implementation-ready project
+`Documentation/lariat-server.md` into implementation-ready project
 plans. The plans are ordered by expected production leverage, not by difficulty.
 
 Reference sets reviewed:
@@ -16,7 +16,7 @@ Reference sets reviewed:
   `operations/date-duration.html`, `operations/serialization-compression.html`,
   `databases/database-interaction.html`, `databases/sql-data-sources.html`,
   and `language/types.html`.
-- Corpus evidence: `Documentation/lasso-perfect-server.md`,
+- Corpus evidence: `Documentation/lariat-server.md`,
   `Documentation/compatibility-matrix.md`, and the scrubbed reports under
   `/Users/timtaplin/Documents/LassoAdapter-workfiles/Reports/`.
 
@@ -62,7 +62,7 @@ failures because no live datasource is wired into those sweeps.
   raw SQL, with per-datasource capability gating.
 - Capability denials already return recoverable `LassoInlineFrame` errors.
 - Real connector exceptions still throw through as Swift errors.
-- `lasso-perfect-server` can wire MySQL using `LASSO_MYSQL_*` plus
+- `lariat-server` can wire MySQL using `LASSO_MYSQL_*` plus
   `LASSO_DATASOURCE_ALIAS`.
 
 ### Plan
@@ -78,7 +78,7 @@ failures because no live datasource is wired into those sweeps.
 2. Use a throwaway fixture schema, not private production tables. Reuse the
    pattern in `Documentation/mysql-fixture-testing.md`: opt in with an env var,
    create deterministic fixture data, clean up afterward.
-3. Run `lasso-perfect-server` with:
+3. Run `lariat-server` with:
    - `LASSO_SITE_ROOT=/path/to/real/site/root`
    - `LASSO_DATASOURCE_ALIAS=<configured datasource alias>`
    - local MySQL connection vars
@@ -393,12 +393,12 @@ a root-confined filesystem implementation (`LassoFileSystemUploadProcessor`).
 `-UseTempNames`, `-FileOverwrite`, `-Size`, and `-Extensions`. Operational
 failures are recoverable through `[protect]`.
 
-`lasso-perfect-server` now injects `LassoFileSystemUploadProcessor` into each
+`lariat-server` now injects `LassoFileSystemUploadProcessor` into each
 request context, rooted at `LASSO_SITE_ROOT`, so live request destinations are
 site-root-confined.
 
 Live-verified end to end (2026-07-12) against a real running
-`lasso-perfect-server`, closing the one item the plan's own "Tests"
+`lariat-server`, closing the one item the plan's own "Tests"
 section hadn't yet crossed off: a real `curl -F` multipart upload against
 a throwaway site root, `[File_ProcessUploads(-Destination='moved')]`
 moved the file out of Perfect-NIO's temp multipart location into a real,
@@ -862,7 +862,7 @@ redirect is set.
    - download name;
    - status;
    - abort flag.
-7. Teach `lasso-perfect-server` to return `FileOutput` or `BytesOutput` from
+7. Teach `lariat-server` to return `FileOutput` or `BytesOutput` from
    that response override instead of the normal rendered HTML.
 
 ### Tests
@@ -1233,7 +1233,7 @@ MySQL-only shape into a discriminated `mysql`/`filemaker`/`datasources{type}`
 one, with full back-compat decoding for every config file written before
 this change. New `LassoMultiBackendInlineProvider` routes `[inline(...)]`
 calls to the right backend by alias. Full design/rationale in
-`Documentation/lasso-perfect-server.md`'s "FileMaker Datasource" section
+`Documentation/lariat-server.md`'s "FileMaker Datasource" section
 — not duplicated here.
 
 **Two real, previously-unimplemented interpreter gaps found and fixed as
@@ -1284,7 +1284,7 @@ under real concurrent load — not a FileMaker-only failure, since every
 HTTP connection shares Swift's one fixed-size cooperative thread pool.
 Full story, root cause, and the actual fix (`runBlockingOffCooperativePool`/
 `runAsyncAndWait` in `Sources/LassoPerfectServer/AsyncBridge.swift`) in
-`Documentation/lasso-perfect-server.md`'s "Adapting to the resurrected
+`Documentation/lariat-server.md`'s "Adapting to the resurrected
 Perfect-FileMaker" subsection and `Documentation/synchronous-render-pipeline.md`.
 
 Verified via unit tests (executor request/response mapping — 16 tests;

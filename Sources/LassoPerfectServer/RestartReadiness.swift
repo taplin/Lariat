@@ -45,8 +45,8 @@ enum RestartReadiness {
     /// re-launch the exact same binary regardless of how it was originally invoked:
     /// an already-absolute argv[0], a path relative to the launch directory (how
     /// every server in this project has been started this session, e.g.
-    /// `.build/out/Products/Debug/lasso-perfect-server`), or a bare command name
-    /// resolved via `$PATH` (a systemd-style `ExecStart=lasso-perfect-server` unit).
+    /// `.build/out/Products/Debug/lariat-server`), or a bare command name
+    /// resolved via `$PATH` (a systemd-style `ExecStart=lariat-server` unit).
     /// Returns `nil` rather than guessing if none of these resolve to something
     /// executable.
     static func resolveOwnExecutablePath(

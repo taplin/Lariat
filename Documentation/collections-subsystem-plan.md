@@ -166,7 +166,7 @@ This is real, new work in `Evaluator.assign`, not something that falls out of `.
 
 ## Files Referenced
 
-- `/Users/timtaplin/Perfect-Lasso/References/Lasso/Lasso 8.5 Language Guide.pdf` (pp. 393–426, Chapter 30, read as page images)
+- `/Users/timtaplin/Lariat/References/Lasso/Lasso 8.5 Language Guide.pdf` (pp. 393–426, Chapter 30, read as page images)
 - `https://lassoguide.com/operations/collections.html`, `https://lassoguide.com/language/index_language.html`
 - `/Users/timtaplin/Perfect-Lasso-collections/Sources/LassoParser/{Evaluator,Runtime,NativeTypes,TypeSystem,ExpressionParser,RegularExpressions}.swift`
 - `/Users/timtaplin/Perfect-Lasso-collections/Documentation/{lasso85-gap-analysis-plan,lasso9-lassoguide-gap-analysis-plan}.md`

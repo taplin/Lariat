@@ -8,7 +8,7 @@ Phase 1 (`application/x-www-form-urlencoded`) is implemented, corrected per
 an architect review to consume Perfect-NIO's own `QueryDecoder` rather than
 the hand-rolled parser this plan originally proposed (Step 3/"URL Decoding
 Rules" — `QueryDecoder` already does exactly this). Also found and fixed a
-prerequisite gap this plan didn't anticipate: `lasso-perfect-server` only
+prerequisite gap this plan didn't anticipate: `lariat-server` only
 ever registered `.GET` routes, so no POST request could reach the render
 path at all before this. `LassoRequestPair` (`Providers.swift`),
 `ServerRequestProvider` real `queryPairs`/`postPairs`
@@ -325,7 +325,7 @@ Unit tests:
 
 Server smoke tests:
 
-1. Run `lasso-perfect-server` against a temporary fixture site.
+1. Run `lariat-server` against a temporary fixture site.
 2. `curl` a GET-only request and verify existing query behavior is unchanged.
 3. `curl -X POST -H 'Content-Type: application/x-www-form-urlencoded'` with
    form data and verify Lasso output from `web_request->postParam`.

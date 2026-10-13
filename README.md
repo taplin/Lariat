@@ -1,16 +1,18 @@
-# Perfect-Lasso
+# Lariat
 
-A Swift reimplementation of the Lasso web-scripting language and server (`lasso-perfect-server`) — still in active development and not yet production-ready, though validated against real code from multiple production e-commerce sites.
+A Swift reimplementation of the Lasso web-scripting language and server (`lariat-server`) — still in active development and not yet production-ready, though validated against real code from multiple production e-commerce sites.
+
+> **Formerly `Perfect-Lasso`.** The project was renamed to Lariat in October 2026. GitHub redirects the old `taplin/Perfect-Lasso` URL here, so existing clones and links keep working, and the `v0.1.0`–`v0.3.0` tags are unchanged.
 
 This repo has no pre-built binary releases yet — you build it from source, against your own toolchain and Homebrew setup. That turns out to be simple: builds are proven to work from a completely standalone clone, with no other repos or sibling checkouts required nearby.
 
 ## Releases
 
-See the [GitHub Releases page](https://github.com/taplin/Perfect-Lasso/releases) for what's changed in each version. As of this release, both **macOS and Linux** are fully validated — build and the complete 1110-test suite pass clean on both, verified from a clean rebuild in a Linux container. The three Perfect-Lasso-internal Linux gaps and one real cross-platform bug found along the way are documented in the release notes.
+See the [GitHub Releases page](https://github.com/taplin/Lariat/releases) for what's changed in each version. As of this release, both **macOS and Linux** are fully validated — build and the complete 1110-test suite pass clean on both, verified from a clean rebuild in a Linux container. The three Lariat-internal Linux gaps and one real cross-platform bug found along the way are documented in the release notes.
 
 ## Trying it against your own site
 
-If you have an existing Lasso site and are curious how much of it this server already handles, the best way to find out is to actually point it at your own code and see what breaks — that's exactly how this project has been developed and tested so far. If you hit something that doesn't render correctly, crashes, or is simply unimplemented, please [open an issue](https://github.com/taplin/Perfect-Lasso/issues) with what you found — real-world Lasso source is what this project improves against, and reports of what's still fragile or missing are the most useful thing you can contribute right now.
+If you have an existing Lasso site and are curious how much of it this server already handles, the best way to find out is to actually point it at your own code and see what breaks — that's exactly how this project has been developed and tested so far. If you hit something that doesn't render correctly, crashes, or is simply unimplemented, please [open an issue](https://github.com/taplin/Lariat/issues) with what you found — real-world Lasso source is what this project improves against, and reports of what's still fragile or missing are the most useful thing you can contribute right now.
 
 ## Requirements
 
@@ -27,9 +29,9 @@ If you have an existing Lasso site and are curious how much of it this server al
 ## Build
 
 ```bash
-git clone https://github.com/taplin/Perfect-Lasso.git
-cd Perfect-Lasso
-swift build -c release --product lasso-perfect-server
+git clone https://github.com/taplin/Lariat.git
+cd Lariat
+swift build -c release --product lariat-server
 ```
 
 The built binary's exact location varies by SwiftPM version — always ask it directly rather than assuming a path:
@@ -40,11 +42,11 @@ swift build -c release --show-bin-path
 
 ## Run
 
-At minimum, `lasso-perfect-server` needs to know what directory to serve:
+At minimum, `lariat-server` needs to know what directory to serve:
 
 ```bash
 LASSO_SITE_ROOT=/path/to/your/lasso/site \
-"$(swift build -c release --show-bin-path)/lasso-perfect-server"
+"$(swift build -c release --show-bin-path)/lariat-server"
 ```
 
 It starts listening on `http://localhost:8181` by default and prints a short startup banner confirming the site root, port, and which optional subsystems (datasources, sessions, admin console) are active.
@@ -57,7 +59,7 @@ Everything is environment-variable- or config-file-driven — no source edits, n
 - `LASSO_DATASOURCE_CONFIG_PATH` — a JSON file for MySQL/FileMaker datasource aliases, credentials, and SMTP relay/DKIM settings (recommended over passing credentials as bare env vars)
 - crawl-report and sitemap-discovery options
 
-is documented in [`Documentation/lasso-perfect-server.md`](Documentation/lasso-perfect-server.md)'s "Configuration" section.
+is documented in [`Documentation/lariat-server.md`](Documentation/lariat-server.md)'s "Configuration" section.
 
 For the optional browser-based operations dashboard (live datasource switching, log tailing, zero-downtime restart), see [`Documentation/admin-console.md`](Documentation/admin-console.md).
 
@@ -65,10 +67,10 @@ For the optional browser-based operations dashboard (live datasource switching, 
 
 ## Using a specific release instead of `main`
 
-`main` moves — if you'd rather build against a stable, known-working snapshot, check the [Releases page](https://github.com/taplin/Perfect-Lasso/releases) for a tagged version and either:
+`main` moves — if you'd rather build against a stable, known-working snapshot, check the [Releases page](https://github.com/taplin/Lariat/releases) for a tagged version and either:
 
 ```bash
-git clone --branch vX.Y.Z https://github.com/taplin/Perfect-Lasso.git
+git clone --branch vX.Y.Z https://github.com/taplin/Lariat.git
 ```
 
 or download that tag's "Source code" archive directly from its Release page, unpack it, and build the same way as above. Each tagged release commits a known-good `Package.resolved`, so you get the exact dependency versions that were verified working at that point — not whatever the tracked `main` branches of this project's dependencies have drifted to since.

@@ -6,10 +6,10 @@ The full from-scratch Linux build this document's final section flagged as
 "not re-attempted" has since been done exhaustively, many times over, from
 a clean `.build` in the `perfect-ci` container: `swift package update &&
 swift build && swift test` passes clean, and the complete 1110-test suite
-passes on Linux (matching macOS exactly). Three Perfect-Lasso-internal
+passes on Linux (matching macOS exactly). Three Lariat-internal
 platform gaps were found and fixed along the way (`InsecureTLSDelegate`'s
 Darwin-only TLS APIs, `.byWords` word-breaking, CoreFoundation JSON-type
-disambiguation — tracked as tasks #191-193), plus a `lasso-perfect-server`
+disambiguation — tracked as tasks #191-193), plus a `lariat-server`
 executable-wide Linux build pass (20 Swift 6 concurrency errors around
 Glibc's `stdout`/`stderr`, a Darwin-only FileMaker Admin API TLS gate,
 missing `FoundationNetworking` imports) and one real, previously-
@@ -17,7 +17,7 @@ undiscovered cross-platform bug in `LassoFileSystemIncludeLoader`'s
 relative-include path resolution (a `swift-corelibs-foundation` behavioral
 gap, not Linux-specific in nature — just never caught before). Perfect-NIO
 needed its own first-ever standalone Linux build fixes too. Shipped as
-[v0.2.2](https://github.com/taplin/Perfect-Lasso/releases/tag/v0.2.2).
+[v0.2.2](https://github.com/taplin/Lariat/releases/tag/v0.2.2).
 Separately, `Perfect-FileMaker-AdminAPI` gained a real cert-pinned Linux TLS
 transport (`FMAdminInsecureLinuxTransport`) for the one gap this review's
 own source-level scan didn't cover (it doesn't touch Lasso Adapter source,

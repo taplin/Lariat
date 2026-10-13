@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "LassoSubsetCrawler",
+    name: "Lariat",
     platforms: [
         .macOS(.v12),
     ],
@@ -18,7 +18,7 @@ let package = Package(
         .executable(name: "lasso-mysql-smoke", targets: ["LassoMySQLSmoke"]),
         .executable(name: "lasso-session-mysql-smoke", targets: ["LassoSessionMySQLSmoke"]),
         .executable(name: "lasso-filemaker-smoke", targets: ["LassoFileMakerSmoke"]),
-        .executable(name: "lasso-perfect-server", targets: ["LassoPerfectServer"]),
+        .executable(name: "lariat-server", targets: ["LassoPerfectServer"]),
     ],
     dependencies: [
         .package(url: "https://github.com/taplin/Perfect-CRUD.git", branch: "main"),

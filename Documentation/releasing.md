@@ -1,10 +1,10 @@
 # Cutting a release
 
-Maintainer runbook for tagging a `lasso-perfect-server` release and publishing its source tarball, per `Documentation/release-target-plan.md`'s build-from-source distribution model. Not needed by anyone just building/running this project — see the root [`README.md`](../README.md) for that.
+Maintainer runbook for tagging a `lariat-server` release and publishing its source tarball, per `Documentation/release-target-plan.md`'s build-from-source distribution model. Not needed by anyone just building/running this project — see the root [`README.md`](../README.md) for that.
 
 ## Prerequisite — pushed to GitHub
 
-`taplin/Perfect-Lasso` is public and live, matching every sibling Perfect-Resurrection library. `origin` is already configured; `main` is pushed and tracked.
+`taplin/Lariat` is public and live, matching every sibling Perfect-Resurrection library. `origin` is already configured; `main` is pushed and tracked.
 
 ## Version scheme
 
@@ -13,7 +13,7 @@ Maintainer runbook for tagging a `lasso-perfect-server` release and publishing i
 ```bash
 git tag -l 'v*' | sort -V | tail -5
 # once the repo is on GitHub:
-gh release list --repo taplin/Perfect-Lasso
+gh release list --repo taplin/Lariat
 ```
 
 ## Pre-flight checks (every time, before tagging)
@@ -36,7 +36,7 @@ This repo has no CI yet, so these are the only verification gate — don't skip 
    ```bash
    rm -rf /tmp/release-verify && git clone --no-local . /tmp/release-verify
    cd /tmp/release-verify && git checkout main
-   swift build -c release --product lasso-perfect-server
+   swift build -c release --product lariat-server
    ```
    (`--no-local` forces a real clone over the git protocol layer even for a local path, rather than a hardlink-optimized copy that could hide a real remote-fetch issue.)
 5. **Review documentation, not just code — before tagging, not after.** Read this repo's own `README.md` top-to-bottom and confirm it's still accurate against what's actually shipping (version/feature claims, platform requirements, anything this release's commits changed). If this release touched or bumped a dependency (a `branch: "main"`-tracked sibling in `Package.swift`), skim that sibling's own `README.md` too for claims that might now be stale (a deployment-target bump, a new capability, a removed one) — dependency repos drift silently since their own doc updates don't show up in this repo's diff. **Why this is here**: `v0.2.1` (2026-07-23) was an entire extra release cut solely to fix a README that had been stale since before `v0.2.0`, plus a docs-only pointer this repo's own README should have gotten in `v0.2.0` in the first place — both were catchable in one pre-flight read, and doing that read one release earlier would have meant one release instead of two.
@@ -58,12 +58,12 @@ GitHub automatically attaches "Source code (zip)" and "Source code (tar.gz)" arc
 Download the actual tarball GitHub just generated (not just re-clone `main`, which isn't necessarily the same content once further commits land) and confirm it builds and runs standalone — this is the literal artifact a user will download, so it's the one that needs verifying directly:
 
 ```bash
-curl -L -o release-check.tar.gz "https://github.com/taplin/Perfect-Lasso/archive/refs/tags/v0.1.0.tar.gz"
+curl -L -o release-check.tar.gz "https://github.com/taplin/Lariat/archive/refs/tags/v0.1.0.tar.gz"
 mkdir release-check && tar -xzf release-check.tar.gz -C release-check --strip-components=1
 cd release-check
-swift build -c release --product lasso-perfect-server
+swift build -c release --product lariat-server
 LASSO_SITE_ROOT=/path/to/a/scratch/site \
-"$(swift build -c release --show-bin-path)/lasso-perfect-server"   # confirm it actually starts and serves a request
+"$(swift build -c release --show-bin-path)/lariat-server"   # confirm it actually starts and serves a request
 ```
 
 ## If something's wrong after publishing
@@ -90,7 +90,7 @@ each release, not after the fact.
   Admin console Phase 6: real crawl-report wiring, job history, alert tags. Picks up Perfect-XML's
   and Perfect-NIO's matching macOS libxml2/zlib pkg-config collision fixes. 1128/1128 tests pass on
   both macOS and Linux (`perfect-ci` container).
-- **`v0.2.3`** (2026-07-27) — dependency-only patch, no Perfect-Lasso source changes. Pulls in
+- **`v0.2.3`** (2026-07-27) — dependency-only patch, no Lariat source changes. Pulls in
   Perfect-CRUD's ADR-0001 connection pooling (`DatabaseConnectionPool`) and async execution
   boundary, plus its `CRUDTableStructure()` visibility fix (was `internal`, broke every host
   module's documented `AdminConsoleDelegate.registeredModels()` implementation); Perfect-NIO's
@@ -98,7 +98,7 @@ each release, not after the fact.
   browser slice; Perfect-MySQL's and Perfect-FileMaker-AdminAPI's own latest `main`.
 - **`v0.2.2`** (2026-07-26) — Linux support fully working, not in-progress. 1110/1110 tests pass on
   both macOS and Linux from a clean rebuild; closed the three Linux gaps deferred since `v0.2.0`
-  plus a first-ever `lasso-perfect-server` executable build/test pass on Linux, which turned up
+  plus a first-ever `lariat-server` executable build/test pass on Linux, which turned up
   several more fixes and one real (not Linux-specific) cross-platform bug in `LassoFileSystemIncludeLoader`.
 - **`v0.2.1-legacy10.15`** (2026-07-24, prerelease) — legacy macOS 10.15/11 build attempt,
   concluded and not recommended for use: a `libmysqlclient` symbol 10.15/11's system `libc++`
