@@ -90,10 +90,15 @@ each release, not after the fact.
   `LassoPerfectSMTP`) and internal types are deliberately unchanged — they name the language being
   parsed and bridged, not the project. No API or behavior change: the only functional edits are the
   admin console's default token filename (`lariat-server-admin.token`) and the startup banner.
-  1127/1127 tests pass on macOS. **Linux was not re-verified for this release** — no container
-  runtime was available on the release machine. Nothing platform-conditional was touched, so parity
-  is expected to hold, but it is unverified rather than confirmed; re-run the `perfect-ci` container
-  suite before relying on it.
+  1127/1127 tests pass on macOS and **1128/1128 on Linux** (`perfect-ci` container, Swift 6.3.2
+  aarch64, clean `.build`), so the repo's verified Linux parity is preserved.
+
+  One caveat for whoever runs this next: `manyConcurrentExecuteCallsRunInParallel()` is a
+  wall-clock test (`elapsed < singleCallDuration * 4`) and fails intermittently when the container
+  is given too few effective cores — it tripped in 2 of 4 runs at `-c 4` on a contended host
+  (0.99s vs a 0.8s tolerance), and passed 5/5 at ~0.41s with `-c 8`. It is unrelated to this
+  release: the rename never touched `ConcurrentOffloadTests.swift`. Give the container 8 CPUs.
+
 - **`v0.3.0`** (2026-07-29) — `&&`/`||` are now value-preserving matching real Lasso semantics
   (previously always collapsed to boolean), fixing a real corpus bug where
   `dsinfo->extend(:#rest || staticarray)` silently dropped search criteria. New language support:
