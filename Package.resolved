@@ -1,5 +1,5 @@
 {
-  "originHash" : "0f11c6b383af9ae445f082653b1b58a23dc7281f5d9b1b48835037c161483881",
+  "originHash" : "c48260ed4b8856500c023b9e66722001ce73c32f8c4a0757ea493ef3280f1ce7",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -31,7 +31,7 @@
     {
       "identity" : "perfect-filemaker-adminapi",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/taplin/Perfect-FileMaker-AdminAPI.git",
+      "location" : "https://github.com/PerfectlySoft/Perfect-FileMaker-AdminAPI.git",
       "state" : {
         "branch" : "main",
         "revision" : "e1762f68c50d83b1275de6f1a735456b9f38bdf8"
